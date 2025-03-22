@@ -1,14 +1,25 @@
 # Changelog
-## [1.3.6] - 2025-02-25
+## [1.4.1] - 2025-03-15
+### Fixed
+* InputProcessSystemGroup missing conditional defines
+
+## [1.4.0] - 2025-03-15
+### Changed
+* Updated to entities 1.4.0-exp.2
+
+## [1.3.6] - 2025-03-15
 ### Added
 * WorldUnmanagedExtensions.GetAllSystemDependencies
 * IsEditorWorld extension
 * Editor world is now always created instead of lazy loaded, you can disable this with BL_DISABLE_CREATE_EDITOR_WORLD
 * WriteLarge to UnsafeThreadStream
 * UnsafeThreadStream to SingletonCollect
+* TypeUtility
+* Some convenient NativeList and List extensions
 
 ### Changed
 * Modernized AssemblyBuilder Tests generation using optionalUnityReferences with TestAssemblies
+* Removed some event allocations
 
 ### Fixed
 * Removed [NativeContainer] from UnsafeMultiHashMap
