@@ -9,7 +9,6 @@
 namespace BovineLabs.Core
 {
     using System;
-    using System.IO;
     using BovineLabs.Core.ConfigVars;
     using BovineLabs.Core.Extensions;
     using Unity.Burst;
