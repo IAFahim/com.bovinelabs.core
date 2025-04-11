@@ -40,7 +40,7 @@ namespace BovineLabs.Core.ObjectManagement
 #if UNITY_EDITOR
         protected virtual void OnValidate()
         {
-            Validate(ref this.keys);
+            ValidateLength(ref this.keys);
         }
 #endif
 

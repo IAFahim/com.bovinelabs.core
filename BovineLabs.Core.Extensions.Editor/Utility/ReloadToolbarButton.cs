@@ -21,7 +21,7 @@ namespace BovineLabs.Core.Editor.Utility
 
         private static EditorToolbarDropdown? dropDown;
 
-        [EditorToolbar(EditorToolbarPosition.RightCenter)]
+        [EditorToolbar(EditorToolbarPosition.RightCenter, -20)]
         public static VisualElement? RequestScriptReload()
         {
             ConfigVarManager.Init();

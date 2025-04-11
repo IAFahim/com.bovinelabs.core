@@ -14,6 +14,7 @@ namespace BovineLabs.Core.Keys
         private string name;
 
         [SerializeField]
+        [Range(0, KMap.MaxCapacity - 1)]
         private int value;
 
         public string Name

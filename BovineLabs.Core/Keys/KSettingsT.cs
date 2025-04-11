@@ -7,6 +7,7 @@ namespace BovineLabs.Core.Keys
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Unity.Mathematics;
     using UnityEngine;
 
     /// <summary> Generic implementation of <see cref="KSettings" /> to allow calling the generic <see cref="K{T}" />. </summary>
@@ -31,9 +32,22 @@ namespace BovineLabs.Core.Keys
         }
 
 #if UNITY_EDITOR
-        protected virtual void OnValidate()
+        protected void OnValidate()
         {
-            Validate(ref this.keys);
+            this.Validate(ref this.keys);
+        }
+
+        protected virtual void Validate(ref NameValue[] keyRef)
+        {
+            ValidateLength(ref keyRef);
+
+            for (var i = 0; i < keyRef.Length; i++)
+            {
+                var k = keyRef[i];
+                k.Name = k.Name.ToLower();
+                k.Value = math.clamp(k.Value, 0, KMap.MaxCapacity - 1);
+                keyRef[i] = k;
+            }
         }
 
         private void Reset()

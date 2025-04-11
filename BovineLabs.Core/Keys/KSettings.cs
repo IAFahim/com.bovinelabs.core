@@ -8,7 +8,6 @@ namespace BovineLabs.Core.Keys
     using System.Collections.Generic;
     using BovineLabs.Core.Settings;
     using JetBrains.Annotations;
-    using Unity.Mathematics;
     using UnityEditor;
     using UnityEngine;
 
@@ -31,23 +30,17 @@ namespace BovineLabs.Core.Keys
         protected abstract void Initialize();
 
 #if UNITY_EDITOR
-        protected static void Validate<T>(ref T[] keys)
+        protected static void ValidateLength<T>(ref T[] keys)
             where T : IKKeyValue
         {
-            if (keys.Length > KMap.MaxCapacity)
+            if (keys.Length <= KMap.MaxCapacity)
             {
-                var keysOld = keys;
-                keys = new T[KMap.MaxCapacity];
-                Array.Copy(keysOld, keys, KMap.MaxCapacity);
+                return;
             }
 
-            for (var i = 0; i < keys.Length; i++)
-            {
-                var k = keys[i];
-                k.Name = k.Name.ToLower();
-                k.Value = math.min(k.Value, KMap.MaxCapacity - 1);
-                keys[i] = k;
-            }
+            var keysOld = keys;
+            keys = new T[KMap.MaxCapacity];
+            Array.Copy(keysOld, keys, KMap.MaxCapacity);
         }
 #endif
 

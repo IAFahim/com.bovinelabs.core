@@ -6,7 +6,6 @@
 namespace BovineLabs.Core.LifeCycle
 {
     using BovineLabs.Core.Groups;
-    using BovineLabs.Core.SubScenes;
     using Unity.Entities;
 
     [UpdateInGroup(typeof(BeforeSceneSystemGroup))]
