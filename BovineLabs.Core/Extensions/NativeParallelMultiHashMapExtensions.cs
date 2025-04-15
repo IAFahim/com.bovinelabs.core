@@ -10,7 +10,6 @@ namespace BovineLabs.Core.Extensions
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.Jobs.LowLevel.Unsafe;
-    using Unity.Mathematics;
 
     /// <summary> Extensions for <see cref="NativeParallelMultiHashMap{TKey,TValue}" />. </summary>
     public static unsafe class NativeParallelMultiHashMapExtensions

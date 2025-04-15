@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.4.2] - 2025-04-11
+## [1.4.2] - 2025-04-14
 
 ### Added
 * AssetSet as a replacement for AssetLoadAuthoring
@@ -9,11 +9,13 @@
 * DynamicIndexedMap
 * ElementAt on FixedArray
 * Update Settings button to EditorSettings to automatically resort your settings if you've made destination world changes
+* PooledNativeList
 
 ### Changed
 * Stopped baking when overriding subscenes
 * Groups no longer add to thin clients by default
 * Cleaned up K validation a little and exposed it a bit easier
+* K rewritten to support any value type
 
 ### Removed
 * AssetLoadAuthoring, now merged into SubSceneLoadAuthoring
@@ -25,6 +27,8 @@
 
 ### Documentation
 * SubScene documentation updated to reflect changes to AssetSet
+* K documentation updated to match refactor and fleshed out
+* PooledNativeList added and a new section for Utility
 
 ## [1.4.1] - 2025-03-29
 
