@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.4.2] - 2025-04-14
+## [1.4.2] - 2025-04-16
 
 ### Added
 * AssetSet as a replacement for AssetLoadAuthoring
@@ -10,6 +10,7 @@
 * ElementAt on FixedArray
 * Update Settings button to EditorSettings to automatically resort your settings if you've made destination world changes
 * PooledNativeList
+* LibraryLoader for loading native libraries dynamically in cross platform manner at runtime
 
 ### Changed
 * Stopped baking when overriding subscenes

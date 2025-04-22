@@ -13,7 +13,7 @@ namespace BovineLabs.Core.Utility
     /// Class implementing a library loader for Unity.
     /// Adopted from LLMUnity:
     /// https://github.com/undreamai/LLMUnity/blob/b64c24566fb8ec17bfb426cb5e4728393af0e9b3/Runtime/LLMLib.cs
-    /// Which was originally aAdapted from SkiaForUnity:
+    /// Which was originally adapted from SkiaForUnity:
     /// https://github.com/ammariqais/SkiaForUnity/blob/f43322218c736d1c41f3a3df9355b90db4259a07/SkiaUnity/Assets/SkiaSharp/SkiaSharp-Bindings/SkiaSharp.HarfBuzz.Shared/HarfBuzzSharp.Shared/LibraryLoader.cs
     /// </summary>
     [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "Platform specific")]
@@ -111,6 +111,11 @@ namespace BovineLabs.Core.Utility
             else
             {
                 throw new PlatformNotSupportedException($"Current platform is unknown, unable to load symbol '{symbolName}' from library {library}.");
+            }
+
+            if (handle == IntPtr.Zero)
+            {
+                throw new EntryPointNotFoundException($"Unable to load symbol '{symbolName}'.");
             }
 
             return handle;
