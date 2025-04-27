@@ -5,12 +5,8 @@
 namespace BovineLabs.Core.Keys
 {
     using System;
-    using System.Collections.Generic;
     using BovineLabs.Core.Settings;
     using JetBrains.Annotations;
-    using Unity.Burst;
-    using Unity.Collections;
-    using Unity.Collections.LowLevel.Unsafe;
     using UnityEngine;
 
     /// <summary>

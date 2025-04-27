@@ -1,6 +1,11 @@
 # Changelog
 
-## [1.4.2] - 2025-04-16
+## [1.4.3] - 2025-04-26
+
+### Added
+* 
+
+## [1.4.2] - 2025-04-26
 
 ### Added
 * AssetSet as a replacement for AssetLoadAuthoring
@@ -17,6 +22,11 @@
 * Groups no longer add to thin clients by default
 * Cleaned up K validation a little and exposed it a bit easier
 * K rewritten to support any value type
+* Tweaked element property nesting a little
+* Optimized DestroySystemGroup and InitializeSystemGroup for high entity counts
+* BovineLabsBootStrap.RequireConnectionApproval is now a ConfigVar
+* InspectorSearch no longer iterates forever on hidden inspectors
+* Toolbar dropdowns now match Unity 6 style and look pretty
 
 ### Removed
 * AssetLoadAuthoring, now merged into SubSceneLoadAuthoring
@@ -25,6 +35,7 @@
 ### Fixed
 * Compile errors when disabling SubScene feature
 * NativeParallelMultiHashMapFallback could lose elements
+* InspectorSearch not able to handle instance component removal
 
 ### Documentation
 * SubScene documentation updated to reflect changes to AssetSet
