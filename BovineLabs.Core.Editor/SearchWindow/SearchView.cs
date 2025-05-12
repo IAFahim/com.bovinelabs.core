@@ -8,6 +8,7 @@ namespace BovineLabs.Core.Editor.SearchWindow
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text;
     using BovineLabs.Core.Editor.UI;
     using UnityEditor;
     using UnityEngine;
@@ -216,7 +217,7 @@ namespace BovineLabs.Core.Editor.SearchWindow
 
         private void OnNavigationReturn()
         {
-            if (this.currentNode != null && this.currentNode.Parent != null)
+            if (this.currentNode is { Parent: not null })
             {
                 this.SetCurrentSelectionNode(this.currentNode.Parent);
             }
@@ -268,7 +269,15 @@ namespace BovineLabs.Core.Editor.SearchWindow
             public Texture2D Icon;
             public object Data;
 
-            public string Name => System.IO.Path.GetFileName(this.Path);
+            public string Name
+            {
+                get
+                {
+                    // System.IO.Path.GetFileName(this.Path); // breaks on < `
+                    var lastIndex = this.Path.LastIndexOf('/');
+                    return lastIndex == -1 ? this.Path : this.Path.Substring(lastIndex + 1);
+                }
+            }
 
             public bool Equals(Item other)
             {
@@ -289,6 +298,37 @@ namespace BovineLabs.Core.Editor.SearchWindow
                     hashCode = (hashCode * 397) ^ (this.Data != null ? this.Data.GetHashCode() : 0);
                     return hashCode;
                 }
+            }
+
+            public static string ConvertTypeToPath(string typeName)
+            {
+                StringBuilder result = new StringBuilder();
+                int angleBracketDepth = 0;
+
+                foreach (char c in typeName)
+                {
+                    if (c == '<')
+                    {
+                        angleBracketDepth++;
+                        result.Append(c);
+                    }
+                    else if (c == '>')
+                    {
+                        angleBracketDepth--;
+                        result.Append(c);
+                    }
+                    else if (c == '.' && angleBracketDepth == 0)
+                    {
+                        // Only replace dots with slashes when we're not inside angle brackets
+                        result.Append('/');
+                    }
+                    else
+                    {
+                        result.Append(c);
+                    }
+                }
+
+                return result.ToString();
             }
         }
     }

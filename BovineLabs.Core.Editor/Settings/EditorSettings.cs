@@ -25,6 +25,7 @@ namespace BovineLabs.Core.Editor.Settings
         private KeyPath[] paths = Array.Empty<KeyPath>();
 
 #if !BL_DISABLE_SUBSCENE
+        [Header("Scenes")]
         [SerializeField]
         private SceneAsset[] prebakeScenes = Array.Empty<SceneAsset>();
 
@@ -32,6 +33,7 @@ namespace BovineLabs.Core.Editor.Settings
         private SceneAsset? startupScene;
 #endif
 
+        [Header("Settings")]
         [SerializeField]
         private SettingsAuthoring? defaultSettingsAuthoring;
 

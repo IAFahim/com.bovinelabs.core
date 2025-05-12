@@ -1,9 +1,21 @@
 # Changelog
 
-## [1.4.3] - 2025-04-26
+## [1.4.3] - 2025-05-12
 
 ### Added
-* 
+* ComponentAsset and ComponentFieldAsset for more stable type and fields instead of directly storing StableTypeHash and Offsets
+
+### Changed
+* Reduced memory cost of MeshSimplifier to help support larger terrain
+
+### Removed
+* AllTypeIndex from TypeManagerEx to speed up domain reloads
+
+### Fixed
+* SearchView can now handle generic paths
+* Timing issue with SubSceneLoadingManagedSystem and subscribing to SceneManager.sceneLoaded
+* ObjectManagementProcessor no longer triggers save unless it triggered dirtying the asset
+* SubSceneEditorToolbar can again unload SubScenes
 
 ## [1.4.2] - 2025-04-26
 

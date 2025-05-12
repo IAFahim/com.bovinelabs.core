@@ -43,7 +43,7 @@ namespace BovineLabs.Core.Editor.Dependency
 
                 items.Add(new SearchView.Item
                 {
-                    Path = t.DebugTypeName.ToString().Replace('.', '/'),
+                    Path = SearchView.Item.ConvertTypeToPath(t.DebugTypeName.ToString()),
                     Data = t,
                 });
             }

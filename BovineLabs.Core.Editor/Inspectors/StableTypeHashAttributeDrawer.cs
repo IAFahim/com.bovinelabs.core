@@ -93,7 +93,7 @@ namespace BovineLabs.Core.Editor.Inspectors
 
                 componentTypes.Add(new SearchView.Item
                 {
-                    Path = t.DebugTypeName.ToString().Replace('.', '/'),
+                    Path = SearchView.Item.ConvertTypeToPath(t.DebugTypeName.ToString()),
                     Data = t.StableTypeHash,
                 });
             }

@@ -65,8 +65,10 @@ namespace BovineLabs.Core.Editor.ObjectManagement
         private static void ProcessAsset(Object asset, Dictionary<Type, Processor> processors, Dictionary<Type, AutoRefAttribute> autoRefMap)
         {
             CheckAutoRef(asset, autoRefMap);
-            CheckAutoID(asset, processors);
-            AssetDatabase.SaveAssetIfDirty(asset);
+            if (CheckAutoID(asset, processors))
+            {
+                AssetDatabase.SaveAssetIfDirty(asset);
+            }
         }
 
         private static void CheckAutoRef(Object asset, Dictionary<Type, AutoRefAttribute> autoRefMap)
@@ -82,15 +84,13 @@ namespace BovineLabs.Core.Editor.ObjectManagement
             autoRefMap[type] = attribute;
         }
 
-        private static void CheckAutoID(Object asset, Dictionary<Type, Processor> processors)
+        private static bool CheckAutoID(Object asset, Dictionary<Type, Processor> processors)
         {
             switch (asset)
             {
                 case IUIDGlobal:
                 {
-                    global.Process(asset);
-
-                    break;
+                    return global.Process(asset);
                 }
 
                 case IUID:
@@ -101,11 +101,11 @@ namespace BovineLabs.Core.Editor.ObjectManagement
                         processor = processors[assetType] = new Processor(assetType);
                     }
 
-                    processor.Process(asset);
-
-                    break;
+                    return processor.Process(asset);
                 }
             }
+
+            return false;
         }
 
         private static void UpdateAutoRef(Type type, AutoRefAttribute attribute)
@@ -194,7 +194,7 @@ namespace BovineLabs.Core.Editor.ObjectManagement
 
             public Type Type { get; }
 
-            public void Process(Object obj)
+            public bool Process(Object obj)
             {
                 var asset = (IUID)obj;
 
@@ -209,7 +209,10 @@ namespace BovineLabs.Core.Editor.ObjectManagement
                     this.map[newId] = 1;
 
                     EditorUtility.SetDirty(obj);
+                    return true;
                 }
+
+                return false;
             }
 
             private Dictionary<int, int> GetIDMap()
@@ -250,7 +253,7 @@ namespace BovineLabs.Core.Editor.ObjectManagement
             private const string Filter = "t:ScriptableObject";
             private Dictionary<int, int>? map;
 
-            public void Process(Object obj)
+            public bool Process(Object obj)
             {
                 var asset = (IUIDGlobal)obj;
 
@@ -265,7 +268,10 @@ namespace BovineLabs.Core.Editor.ObjectManagement
                     this.map[newId] = 1;
 
                     EditorUtility.SetDirty(obj);
+                    return true;
                 }
+
+                return false;
             }
 
             private static Dictionary<int, int> GetIDMap()

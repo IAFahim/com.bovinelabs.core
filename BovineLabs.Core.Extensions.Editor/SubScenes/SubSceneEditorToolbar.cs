@@ -178,7 +178,7 @@ namespace BovineLabs.Core.Editor.SubScenes
 
             foreach (var s in scenes)
             {
-                if (s.Value)
+                if (s.Value && !TempSubScenes.ContainsKey(s.Key))
                 {
                     continue;
                 }
