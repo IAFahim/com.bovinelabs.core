@@ -11,6 +11,9 @@
 ### Removed
 * AllTypeIndex from TypeManagerEx to speed up domain reloads
 
+### documentation
+* LifeCycle
+
 ### Fixed
 * SearchView can now handle generic paths
 * Timing issue with SubSceneLoadingManagedSystem and subscribing to SceneManager.sceneLoaded
