@@ -15,7 +15,7 @@ namespace BovineLabs.Core.Iterators
 
     public static unsafe class DynamicExtensions
     {
-        private const int DefaultMinGrowth = 64;
+        public const int DefaultMinGrowth = 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static DynamicBuffer<TBuffer> InitializeHashMap<TBuffer, TKey, TValue>(
@@ -128,7 +128,7 @@ namespace BovineLabs.Core.Iterators
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static DynamicBuffer<TBuffer> InitializeIndexed<TBuffer, TKey, TIndex, TValue>(
+        public static DynamicBuffer<TBuffer> InitializeIndexedMap<TBuffer, TKey, TIndex, TValue>(
             this DynamicBuffer<TBuffer> buffer, int capacity = 0, int minGrowth = DefaultMinGrowth)
             where TBuffer : unmanaged, IDynamicIndexedMap<TKey, TIndex, TValue>
             where TKey : unmanaged, IEquatable<TKey>

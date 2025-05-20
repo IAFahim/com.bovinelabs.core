@@ -27,7 +27,7 @@
   "allowUnsafeCode": true,
   "overrideReferences": false,
   "precompiledReferences": [],
-  "autoReferenced": true,
+  "autoReferenced": false,
   "defineConstraints": [
     "BL_CORE_EXTENSIONS"
   ],
@@ -41,16 +41,6 @@
       "name": "com.unity.physics",
       "expression": "",
       "define": "UNITY_PHYSICS"
-    },
-    {
-      "name": "com.bovinelabs.game",
-      "expression": "",
-      "define": "BL_CORE_EXTENSIONS"
-    },
-    {
-      "name": "com.bovinelabs.camera",
-      "expression": "",
-      "define": "BL_CORE_EXTENSIONS"
     },
     {
       "name": "com.unity.localization",

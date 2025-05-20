@@ -171,7 +171,12 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
                     continue;
                 }
 
-                AssetDatabase.CreateFolder(activeFolderPath, assemblyName);
+                var result = AssetDatabase.CreateFolder(activeFolderPath, assemblyName);
+                if (string.IsNullOrWhiteSpace(result))
+                {
+                    Debug.LogError($"Unable to create folder: {activeFolderPath} assembly name: {assemblyName}");
+                    return;
+                }
 
                 var definition = AssemblyDefinitionTemplate.New();
                 definition.name = assemblyName;
@@ -333,7 +338,6 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
                 internalAccessTemplate += string.Format(InternalAccessTemplate, assembly);
             }
 
-            // var text = GetAssemblyInfoTemplate() + internalAccessTemplate;
             File.WriteAllText(assemblyInfoPath, internalAccessTemplate);
         }
     }

@@ -1,12 +1,19 @@
 # Changelog
 
-## [1.4.3] - 2025-05-12
+## [1.4.3] - 2025-05-19
 
 ### Added
 * ComponentAsset and ComponentFieldAsset for more stable type and fields instead of directly storing StableTypeHash and Offsets
+* A Unity compatible and updated version of CodeGenHelpers https://github.com/dansiegel/CodeGenHelpers to use with source generators
+* Source Generator for generating IDynamic[HashMap|HashSet|IndexedMap|MultiHashMap|UntypedHashMap] Initialize and AsMap methods
 
 ### Changed
+* Scope limited source generators
+* Disable auto reference of assemblies
 * Reduced memory cost of MeshSimplifier to help support larger terrain
+* Rewrote InputGenerator to use CodeGenHelpers
+* Breaking: Input has been moved to its own assembly to scope limit the source generator
+* Analyzers no longer inject in projects that match Unity.*
 
 ### Removed
 * AllTypeIndex from TypeManagerEx to speed up domain reloads

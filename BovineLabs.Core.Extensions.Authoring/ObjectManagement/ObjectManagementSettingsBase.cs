@@ -118,7 +118,7 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
             }
 
             var objectGroupRegistry = baker.AddBuffer<ObjectGroupRegistry>(entity).Initialize().AsMap();
-            var objectGroupMatcher = baker.AddBuffer<ObjectGroupMatcher>(entity).Initialize().AsHashSet();
+            var objectGroupMatcher = baker.AddBuffer<ObjectGroupMatcher>(entity).Initialize().AsMap();
 
             foreach (var group in this.ObjectGroups)
             {

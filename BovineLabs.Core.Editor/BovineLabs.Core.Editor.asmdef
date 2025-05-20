@@ -11,6 +11,7 @@
     "Unity.Entities.Hybrid",
     "Unity.Entities.UI",
     "Unity.Entities.UI.Editor",
+    "Unity.InputSystem",
     "Unity.InternalAPIEditorBridge.002",
     "Unity.Logging",
     "Unity.Mathematics",
@@ -27,7 +28,7 @@
   "allowUnsafeCode": true,
   "overrideReferences": false,
   "precompiledReferences": [],
-  "autoReferenced": true,
+  "autoReferenced": false,
   "defineConstraints": [],
   "versionDefines": [
     {

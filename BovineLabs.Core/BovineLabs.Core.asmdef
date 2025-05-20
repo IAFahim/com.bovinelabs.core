@@ -21,7 +21,7 @@
   "allowUnsafeCode": true,
   "overrideReferences": true,
   "precompiledReferences": [],
-  "autoReferenced": true,
+  "autoReferenced": false,
   "defineConstraints": [],
   "versionDefines": [
     {

@@ -505,7 +505,7 @@ namespace BovineLabs.Core.Tests.Iterators
             var map = this
                 .Manager
                 .GetBuffer<CustomStructMap>(entity)
-                .InitializeIndexed<CustomStructMap, CustomKey, CustomIndex, CustomValue>()
+                .InitializeIndexedMap<CustomStructMap, CustomKey, CustomIndex, CustomValue>()
                 .AsIndexedMap<CustomStructMap, CustomKey, CustomIndex, CustomValue>();
 
             var key1 = new CustomKey
@@ -558,7 +558,7 @@ namespace BovineLabs.Core.Tests.Iterators
             var map = this
                 .Manager
                 .GetBuffer<EnumWrapperMap>(entity)
-                .InitializeIndexed<EnumWrapperMap, TestEnumKey, CategoryEnumIndex, byte>()
+                .InitializeIndexedMap<EnumWrapperMap, TestEnumKey, CategoryEnumIndex, byte>()
                 .AsIndexedMap<EnumWrapperMap, TestEnumKey, CategoryEnumIndex, byte>();
 
             map.Add(new TestEnumKey(TestEnum.Value1), new CategoryEnumIndex(Category.CategoryA), 10);
@@ -837,7 +837,7 @@ namespace BovineLabs.Core.Tests.Iterators
             return this
                 .Manager
                 .GetBuffer<TestIndexedMap>(entity)
-                .InitializeIndexed<TestIndexedMap, int, short, float>(0, growth)
+                .InitializeIndexedMap<TestIndexedMap, int, short, float>(0, growth)
                 .AsIndexedMap<TestIndexedMap, int, short, float>();
         }
 
