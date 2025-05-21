@@ -18,7 +18,6 @@
     "Unity.Logging",
     "Unity.Mathematics",
     "Unity.Mathematics.Extensions",
-    "Unity.NetCode",
     "Unity.Physics",
     "Unity.Scenes",
     "Unity.Scenes.Editor",

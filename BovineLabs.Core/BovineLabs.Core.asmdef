@@ -11,7 +11,6 @@
     "Unity.Logging",
     "Unity.Mathematics",
     "Unity.Mathematics.Extensions",
-    "Unity.NetCode",
     "Unity.Physics",
     "Unity.Scenes",
     "Unity.Transforms"
@@ -26,27 +25,27 @@
   "versionDefines": [
     {
       "name": "com.bovinelabs.game",
-      "expression": "0",
+      "expression": "",
       "define": "BL_GAME"
     },
     {
       "name": "com.unity.netcode",
-      "expression": "0",
+      "expression": "",
       "define": "UNITY_NETCODE"
     },
     {
       "name": "com.unity.physics",
-      "expression": "0",
+      "expression": "",
       "define": "UNITY_PHYSICS"
     },
     {
       "name": "com.unity.entities.graphics",
-      "expression": "0",
+      "expression": "",
       "define": "UNITY_GRAPHICS"
     },
     {
       "name": "com.unity.modules.terrain",
-      "expression": "0",
+      "expression": "",
       "define": "UNITY_TERRAIN"
     }
   ],

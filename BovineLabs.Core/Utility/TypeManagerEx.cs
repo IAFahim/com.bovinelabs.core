@@ -50,7 +50,9 @@ namespace BovineLabs.Core.Utility
             foreach (var t in allSystemTypes)
             {
                 var typeName = t?.Name ?? "null";
-                systemTypeNames.Add(typeName);
+                FixedString128Bytes fs = default;
+                fs.CopyFromTruncated(typeName); // we just ignore truncated errors
+                systemTypeNames.Add(fs);
             }
 
             SharedSystemTypeNames.Ref.Data = new IntPtr(systemTypeNames.Ptr);
