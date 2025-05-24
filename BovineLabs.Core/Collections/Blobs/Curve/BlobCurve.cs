@@ -129,7 +129,7 @@ namespace BovineLabs.Core.Collections
                 var k = keys[i];
                 if (k.weightedMode != WeightedMode.None)
                 {
-                    Debug.LogWarning(
+                    BLDebug.LogWarningString(
                         $"Weight Not Supported! Key[{i}, Weight[{k.weightedMode}, In{k.inWeight}, Out{k.outWeight}], Time{k.time}, Value{k.value}]");
                 }
             }

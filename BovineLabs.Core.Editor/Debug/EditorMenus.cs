@@ -9,7 +9,6 @@ namespace BovineLabs.Core.Editor
     using BovineLabs.Core.Editor.Utility;
     using Unity.Editor.Bridge;
     using Unity.Entities.Editor;
-    using Unity.Logging;
     using UnityEditor;
     using UnityEngine;
     using Resources = UnityEngine.Resources;
@@ -20,12 +19,12 @@ namespace BovineLabs.Core.Editor
         private const string RootToolsMenu = RootMenu + "Tools/";
 
         private const string LogLevelBLMenu = RootMenu + "Logging/";
-        private const string DebugLevelVerboseBLMenuEnabled = LogLevelBLMenu + "0. Verbose";
-        private const string DebugLevelDebugBLMenuEnabled = LogLevelBLMenu + "1. Debug";
-        private const string DebugLevelInfoBLMenuEnabled = LogLevelBLMenu + "2. Info";
+        private const string DebugLevelVerboseBLMenuEnabled = LogLevelBLMenu + "6. Verbose";
+        private const string DebugLevelDebugBLMenuEnabled = LogLevelBLMenu + "5. Debug";
+        private const string DebugLevelInfoBLMenuEnabled = LogLevelBLMenu + "4. Info";
         private const string DebugLevelWarningBLMenuEnabled = LogLevelBLMenu + "3. Warning";
-        private const string DebugLevelErrorBLMenuEnabled = LogLevelBLMenu + "4. Error";
-        private const string DebugLevelFatalBLMenuEnabled = LogLevelBLMenu + "5. Fatal";
+        private const string DebugLevelErrorBLMenuEnabled = LogLevelBLMenu + "2. Error";
+        private const string DebugLevelFatalBLMenuEnabled = LogLevelBLMenu + "1. Fatal";
 
         private const string DataModeSharedMenu = RootToolsMenu + "DataMode/";
 
@@ -47,35 +46,11 @@ namespace BovineLabs.Core.Editor
 
         private static LogLevel BLLogLevel
         {
-            get
-            {
-                if (Application.isPlaying)
-                {
-                    return (LogLevel)BLDebugSystem.LogLevel.Data;
-                }
-
-                if (!int.TryParse(EditorPrefs.GetString(BLDebugSystem.LogLevelName, BLDebugSystem.LogLevelDefaultValue.ToString()), out var value))
-                {
-                    return (LogLevel)BLDebugSystem.LogLevelDefaultValue;
-                }
-
-                return (LogLevel)value;
-            }
-
-            set
-            {
-                if (Application.isPlaying)
-                {
-                    BLDebugSystem.LogLevel.Data = (int)value;
-                }
-                else
-                {
-                    EditorPrefs.SetString(BLDebugSystem.LogLevelName, ((int)value).ToString());
-                }
-            }
+            get => (LogLevel)BLDebug.CurrentLogLevel.Data;
+            set => BLDebug.CurrentLogLevel.Data = (int)value;
         }
 
-        [MenuItem(DebugLevelVerboseBLMenuEnabled, false, priority = -45)]
+        [MenuItem(DebugLevelVerboseBLMenuEnabled, false, priority = -40)]
         private static void DebugLevelVerboseBLMenu()
         {
             BLLogLevel = LogLevel.Verbose;
@@ -88,7 +63,7 @@ namespace BovineLabs.Core.Editor
             return true;
         }
 
-        [MenuItem(DebugLevelDebugBLMenuEnabled, false, priority = -44)]
+        [MenuItem(DebugLevelDebugBLMenuEnabled, false, priority = -41)]
         private static void DebugLevelDebugBLMenu()
         {
             BLLogLevel = LogLevel.Debug;
@@ -101,7 +76,7 @@ namespace BovineLabs.Core.Editor
             return true;
         }
 
-        [MenuItem(DebugLevelInfoBLMenuEnabled, false, priority = -43)]
+        [MenuItem(DebugLevelInfoBLMenuEnabled, false, priority = -42)]
         private static void InfoLevelInfoBLMenu()
         {
             BLLogLevel = LogLevel.Info;
@@ -114,7 +89,7 @@ namespace BovineLabs.Core.Editor
             return true;
         }
 
-        [MenuItem(DebugLevelWarningBLMenuEnabled, false, priority = -42)]
+        [MenuItem(DebugLevelWarningBLMenuEnabled, false, priority = -43)]
         private static void WarningLevelWarningBLMenu()
         {
             BLLogLevel = LogLevel.Warning;
@@ -127,7 +102,7 @@ namespace BovineLabs.Core.Editor
             return true;
         }
 
-        [MenuItem(DebugLevelErrorBLMenuEnabled, false, priority = -41)]
+        [MenuItem(DebugLevelErrorBLMenuEnabled, false, priority = -44)]
         private static void ErrorLevelErrorBLMenu()
         {
             BLLogLevel = LogLevel.Error;
@@ -140,7 +115,7 @@ namespace BovineLabs.Core.Editor
             return true;
         }
 
-        [MenuItem(DebugLevelFatalBLMenuEnabled, false, priority = -40)]
+        [MenuItem(DebugLevelFatalBLMenuEnabled, false, priority = -45)]
         private static void FatalLevelFatalBLMenu()
         {
             BLLogLevel = LogLevel.Fatal;

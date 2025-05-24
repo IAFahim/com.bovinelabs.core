@@ -6,6 +6,7 @@ namespace BovineLabs.Core.Extensions
 {
     using System;
     using System.Text;
+    using Unity.Collections;
 
     /// <summary> Extensions for strings. </summary>
     public static class StringExtensions
@@ -95,6 +96,27 @@ namespace BovineLabs.Core.Extensions
             }
 
             return source.Remove(source.LastIndexOf(value, StringComparison.Ordinal));
+        }
+
+        public static FixedString32Bytes ToFixedString32NoError(this string source)
+        {
+            FixedString32Bytes fs = default;
+            fs.CopyFromTruncated(source);
+            return fs;
+        }
+
+        public static FixedString64Bytes ToFixedString64NoError(this string source)
+        {
+            FixedString64Bytes fs = default;
+            fs.CopyFromTruncated(source);
+            return fs;
+        }
+
+        public static FixedString128Bytes ToFixedString128NoError(this string source)
+        {
+            FixedString128Bytes fs = default;
+            fs.CopyFromTruncated(source);
+            return fs;
         }
     }
 }

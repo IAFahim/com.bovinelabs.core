@@ -113,20 +113,20 @@ namespace BovineLabs.Core.Editor.ObjectManagement
             var managerGuid = AssetDatabase.FindAssets($"t:{attribute.ManagerType}");
             if (managerGuid.Length == 0)
             {
-                Debug.LogError($"No manager found for {attribute.ManagerType}");
+                BLDebug.LogErrorString($"No manager found for {attribute.ManagerType}");
                 return;
             }
 
             if (managerGuid.Length > 1)
             {
-                Debug.LogError($"More than one manager found for {attribute.ManagerType}");
+                BLDebug.LogErrorString($"More than one manager found for {attribute.ManagerType}");
                 return;
             }
 
             var manager = AssetDatabase.LoadAssetAtPath<ScriptableObject>(AssetDatabase.GUIDToAssetPath(managerGuid[0]));
-            if (manager == null)
+            if (!manager)
             {
-                Debug.LogError("Manager wasn't a ScriptableObject");
+                BLDebug.LogErrorString("Manager wasn't a ScriptableObject");
                 return;
             }
 
@@ -134,19 +134,19 @@ namespace BovineLabs.Core.Editor.ObjectManagement
             var sp = so.FindProperty(attribute.FieldName);
             if (sp == null)
             {
-                Debug.LogError($"Property {attribute.FieldName} not found for {attribute.ManagerType}");
+                BLDebug.LogErrorString($"Property {attribute.FieldName} not found for {attribute.ManagerType}");
                 return;
             }
 
             if (!sp.isArray)
             {
-                Debug.LogError($"Property {attribute.FieldName} was not type of array for {attribute.ManagerType}");
+                BLDebug.LogErrorString($"Property {attribute.FieldName} was not type of array for {attribute.ManagerType}");
                 return;
             }
 
             if (sp.arrayElementType != $"PPtr<${type.Name}>")
             {
-                Debug.LogError($"Property {attribute.FieldName} was not type of {type.Name} for {attribute.ManagerType}");
+                BLDebug.LogErrorString($"Property {attribute.FieldName} was not type of {type.Name} for {attribute.ManagerType}");
                 return;
             }
 

@@ -31,13 +31,13 @@ namespace BovineLabs.Core.Editor.Inspectors
             {
                 if (att.OnlySize)
                 {
-                    Debug.LogError("OnlyZeroSize && OnlySize will return no results");
+                    BLDebug.LogErrorString("OnlyZeroSize && OnlySize will return no results");
                     return componentTypes;
                 }
 
                 if (att.Category == StableTypeHashAttribute.TypeCategory.BufferData)
                 {
-                    Debug.LogError("OnlyZeroSize && Buffer category will return no results");
+                    BLDebug.LogErrorString("OnlyZeroSize && Buffer category will return no results");
                     return componentTypes;
                 }
             }

@@ -9,7 +9,6 @@
     "Unity.Entities.Hybrid",
     "Unity.InputSystem",
     "Unity.Localization",
-    "Unity.Logging",
     "Unity.Mathematics",
     "Unity.Mathematics.Extensions",
     "Unity.NetCode",

@@ -10,7 +10,7 @@ namespace BovineLabs.Core.Iterators
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
 
-    public readonly unsafe ref struct HashHelper<TKey>
+    internal readonly unsafe ref struct HashHelper<TKey>
         where TKey : unmanaged, IEquatable<TKey>
     {
         private readonly int keysOffset;
@@ -28,7 +28,7 @@ namespace BovineLabs.Core.Iterators
             this.bucketsOffset = (hashMapDataSize + bucketOffset) - offset;
         }
 
-        internal TKey* Keys
+        public TKey* Keys
         {
             get
             {
@@ -39,7 +39,7 @@ namespace BovineLabs.Core.Iterators
             }
         }
 
-        internal int* Next
+        public int* Next
         {
             get
             {
@@ -50,7 +50,7 @@ namespace BovineLabs.Core.Iterators
             }
         }
 
-        internal int* Buckets
+        public int* Buckets
         {
             get
             {
@@ -67,7 +67,7 @@ namespace BovineLabs.Core.Iterators
             UnsafeUtility.MemSet(this.Buckets, 0xff, bucketCapacity * sizeof(int));
         }
 
-        internal int Find(TKey key, int capacity, int bucketCapacityMask)
+        public int Find(TKey key, int capacity, int bucketCapacityMask)
         {
             // First find the slot based on the hash
             var bucket = GetBucket(key, bucketCapacityMask);
@@ -93,8 +93,37 @@ namespace BovineLabs.Core.Iterators
             return -1;
         }
 
+        public void RemoveIndex(int entryIdx, int bucketCapacityMask)
+        {
+            // We need to iterate until we find the same index
+            var index = UnsafeUtility.ReadArrayElement<TKey>(this.Keys, entryIdx);
+
+            var indexBucket = GetBucket(index, bucketCapacityMask);
+            var indexPrevEntry = -1;
+            var indexEntryIdx = this.Buckets[indexBucket];
+
+            while (entryIdx != indexEntryIdx)
+            {
+                indexPrevEntry = indexEntryIdx;
+                indexEntryIdx = this.Next[indexEntryIdx];
+            }
+
+            // Found matching element, remove it
+            if (indexPrevEntry < 0)
+            {
+                this.Buckets[indexBucket] = this.Next[indexEntryIdx];
+            }
+            else
+            {
+                this.Next[indexPrevEntry] = this.Next[indexEntryIdx];
+            }
+
+            // And free the index
+            this.Next[indexEntryIdx] = this.Next[entryIdx]; // TODO we don't add this way so it shouldn't matter
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int GetBucket(in TKey key, int bucketCapacityMask)
+        public static int GetBucket(in TKey key, int bucketCapacityMask)
         {
             return (int)((uint)key.GetHashCode() & bucketCapacityMask);
         }

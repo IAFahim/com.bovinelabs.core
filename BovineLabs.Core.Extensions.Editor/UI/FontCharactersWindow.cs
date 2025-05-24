@@ -291,7 +291,7 @@ namespace BovineLabs.Core.Editor.UI
                 var index = GetIndex(type);
                 if (index < 0)
                 {
-                    Debug.LogWarning($"Font {font} was not a valid type.");
+                    BLDebug.LogWarningString($"Font {font} was not a valid type.");
                     continue;
                 }
 
@@ -313,7 +313,7 @@ namespace BovineLabs.Core.Editor.UI
                 var index = GetIndex(type);
                 if (index < 0)
                 {
-                    Debug.LogWarning($"Font {font} was not a valid type.");
+                    BLDebug.LogWarningString($"Font {font} was not a valid type.");
                     continue;
                 }
 
@@ -729,7 +729,7 @@ namespace BovineLabs.Core.Editor.UI
                     }
                     catch
                     {
-                        Debug.Log("No characters selected or invalid format.");
+                        BLDebug.LogInfoString("No characters selected or invalid format.");
                     }
                 }
                 else

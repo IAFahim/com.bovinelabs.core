@@ -37,9 +37,9 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
 
             var components = baker.AddBuffer<ObjectCategoryComponents>(entity);
 
-            if (objectCategories == null)
+            if (!objectCategories)
             {
-                Debug.LogWarning("Categories missing");
+                BLDebug.LogWarningString("Categories missing");
                 return;
             }
 
@@ -55,13 +55,13 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
 
                 if (!unique.Add(c.Value))
                 {
-                    Debug.LogWarning($"Duplicate entries for {c.Value}");
+                    BLDebug.LogWarningString($"Duplicate entries for {c.Value}");
                     continue;
                 }
 
                 if (c.Value >= ObjectCategory.MaxBits)
                 {
-                    Debug.LogWarning($"Value outside bit field range {c.Value}");
+                    BLDebug.LogWarningString($"Value outside bit field range {c.Value}");
                     continue;
                 }
 

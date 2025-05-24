@@ -1,4 +1,4 @@
-﻿// <copyright file="DynamicIndexedMap.cs" company="BovineLabs">
+// <copyright file="DynamicIndexed2Map.cs" company="BovineLabs">
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
@@ -14,23 +14,24 @@ namespace BovineLabs.Core.Iterators
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.Entities;
 
-    [DebuggerTypeProxy(typeof(DynamicIndexedMapDebuggerTypeProxy<,,>))]
-    public unsafe struct DynamicIndexedMap<TKey, TIndex, TValue> : IEnumerable<KIV<TKey, TIndex, TValue>>
+    [DebuggerTypeProxy(typeof(DynamicIndexed2MapDebuggerTypeProxy<,,,>))]
+    public unsafe struct DynamicIndexed2Map<TKey, TIndex1, TIndex2, TValue> : IEnumerable<KIV2<TKey, TIndex1, TIndex2, TValue>>
         where TKey : unmanaged, IEquatable<TKey>
-        where TIndex : unmanaged, IEquatable<TIndex>
+        where TIndex1 : unmanaged, IEquatable<TIndex1>
+        where TIndex2 : unmanaged, IEquatable<TIndex2>
         where TValue : unmanaged
     {
         private readonly DynamicBuffer<byte> buffer;
 
         [NativeDisableUnsafePtrRestriction]
-        private DynamicIndexedMapHelper<TKey, TIndex, TValue>* helper;
+        private DynamicIndexed2MapHelper<TKey, TIndex1, TIndex2, TValue>* helper;
 
-        internal DynamicIndexedMap(DynamicBuffer<byte> buffer)
+        internal DynamicIndexed2Map(DynamicBuffer<byte> buffer)
         {
             CheckSize(buffer);
 
             this.buffer = buffer;
-            this.helper = buffer.AsIndexedHelper<TKey, TIndex, TValue>();
+            this.helper = buffer.AsIndexed2Helper<TKey, TIndex1, TIndex2, TValue>();
         }
 
         /// <summary> Gets a value indicating whether this hash map has been allocated (and not yet deallocated). </summary>
@@ -79,11 +80,11 @@ namespace BovineLabs.Core.Iterators
             {
                 this.buffer.CheckWriteAccess();
                 this.RefCheck();
-                DynamicIndexedMapHelper<TKey, TIndex, TValue>.Resize(this.buffer, ref this.helper, value);
+                DynamicIndexed2MapHelper<TKey, TIndex1, TIndex2, TValue>.Resize(this.buffer, ref this.helper, value);
             }
         }
 
-        internal DynamicIndexedMapHelper<TKey, TIndex, TValue>* Helper => this.helper;
+        internal DynamicIndexed2MapHelper<TKey, TIndex1, TIndex2, TValue>* Helper => this.helper;
 
         /// <summary> Removes all key-value pairs. </summary>
         /// <remarks> Does not change the capacity. </remarks>
@@ -99,15 +100,16 @@ namespace BovineLabs.Core.Iterators
         /// </summary>
         /// <remarks> If the key is already present, this method returns false without modifying the hash map. </remarks>
         /// <param name="key"> The key to add. </param>
-        /// <param name="index"> The index to add. </param>
+        /// <param name="index1"> The first index to add. </param>
+        /// <param name="index2"> The second index to add. </param>
         /// <param name="item"> The value to add. </param>
         /// <returns> True if the key-value pair was added. </returns>
-        public bool TryAdd(TKey key, TIndex index, TValue item)
+        public bool TryAdd(TKey key, TIndex1 index1, TIndex2 index2, TValue item)
         {
             this.buffer.CheckWriteAccess();
             this.RefCheck();
 
-            var idx = DynamicIndexedMapHelper<TKey, TIndex, TValue>.TryAdd(this.buffer, ref this.helper, key, index, item);
+            var idx = DynamicIndexed2MapHelper<TKey, TIndex1, TIndex2, TValue>.TryAdd(this.buffer, ref this.helper, key, index1, index2, item);
             return idx != -1;
         }
 
@@ -116,15 +118,16 @@ namespace BovineLabs.Core.Iterators
         /// </summary>
         /// <remarks> If the key is already present, this method throws without modifying the hash map. </remarks>
         /// <param name="key"> The key to add. </param>
-        /// <param name="index"> The index to add. </param>
+        /// <param name="index1"> The first index to add. </param>
+        /// <param name="index2"> The second index to add. </param>
         /// <param name="item"> The value to add. </param>
         /// <exception cref="ArgumentException"> Thrown if the key was already present. </exception>
-        public void Add(TKey key, TIndex index, TValue item)
+        public void Add(TKey key, TIndex1 index1, TIndex2 index2, TValue item)
         {
             this.buffer.CheckWriteAccess();
             this.RefCheck();
 
-            DynamicIndexedMapHelper<TKey, TIndex, TValue>.AddUnique(this.buffer, ref this.helper, key, index, item);
+            DynamicIndexed2MapHelper<TKey, TIndex1, TIndex2, TValue>.AddUnique(this.buffer, ref this.helper, key, index1, index2, item);
         }
 
         /// <summary>
@@ -156,7 +159,7 @@ namespace BovineLabs.Core.Iterators
         {
             this.buffer.CheckWriteAccess();
             this.RefCheck();
-            DynamicIndexedMapHelper<TKey, TIndex, TValue>.Flatten(this.buffer, ref this.helper);
+            DynamicIndexed2MapHelper<TKey, TIndex1, TIndex2, TValue>.Flatten(this.buffer, ref this.helper);
         }
 
         /// <summary>
@@ -175,50 +178,80 @@ namespace BovineLabs.Core.Iterators
         /// Returns the value associated with a key.
         /// </summary>
         /// <param name="key"> The key to look up. </param>
-        /// <param name="index"> Outputs the value index with the key. Outputs default if the key was not present. </param>v
+        /// <param name="index1"> Outputs the value index1 with the key. Outputs default if the key was not present. </param>v
+        /// <param name="index2"> Outputs the value index2 with the key. Outputs default if the key was not present. </param>v
         /// <param name="item"> Outputs the value associated with the key. Outputs default if the key was not present. </param>
         /// <returns> True if the key was present. </returns>
-        public readonly bool TryGetValue(TKey key, out TIndex index, out TValue item)
+        public readonly bool TryGetValue(TKey key, out TIndex1 index1, out TIndex2 index2, out TValue item)
         {
             this.buffer.CheckReadAccess();
             this.RefCheck();
-            return this.helper->TryGetValue(key, out index, out item);
+            return this.helper->TryGetValue(key, out index1, out index2, out item);
         }
 
         /// <summary> Returns the value associated with a key. </summary>
-        /// <param name="index">The index to look up.</param>
+        /// <param name="index1">The index to look up.</param>
         /// <param name="key">>Outputs the unique key associated with the index. Outputs default if the index was not present.</param>
+        /// <param name="index2"> Outputs the value index2 with the key. Outputs default if the key was not present. </param>v
         /// <param name="item">Outputs the value associated with the key. Outputs default if the key was not present.</param>
         /// <param name="it"> The iterator to be used for <see cref="TryGetNextValue"/>. </param>
         /// <returns>True if the key was present.</returns>
-        public readonly bool TryGetFirstValue(TIndex index, out TKey key, out TValue item, out HashMapIterator<TIndex> it)
+        public readonly bool TryGetFirstValue(TIndex1 index1, out TKey key, out TIndex2 index2, out TValue item, out HashMapIterator<TIndex1> it)
         {
             this.buffer.CheckReadAccess();
             this.RefCheck();
-            return this.helper->TryGetFirstValue(index, out key, out item, out it);
+            return this.helper->TryGetFirstValue(index1, out key, out index2, out item, out it);
         }
 
         /// <summary> Advances an iterator to the next value associated with its key. </summary>
         /// <param name="key">>Outputs the next key.</param>
+        /// <param name="index2">Outputs the index2 value.</param>
         /// <param name="item">Outputs the next value.</param>
         /// <param name="it">A reference to the iterator to advance.</param>
         /// <returns>True if the key was present and had another value.</returns>
-        public readonly bool TryGetNextValue(out TKey key, out TValue item, ref HashMapIterator<TIndex> it)
+        public readonly bool TryGetNextValue(out TKey key, out TIndex2 index2, out TValue item, ref HashMapIterator<TIndex1> it)
         {
             this.buffer.CheckReadAccess();
             this.RefCheck();
-            return this.helper->TryGetNextValue(out key, out item, ref it);
+            return this.helper->TryGetNextValue(out key, out index2, out item, ref it);
+        }
+
+        /// <summary> Returns the value associated with a key. </summary>
+        /// <param name="index2">The index2 to look up.</param>
+        /// <param name="key">>Outputs the unique key associated with the index. Outputs default if the index was not present.</param>
+        /// <param name="index1"> Outputs the value index1 with the key. Outputs default if the key was not present. </param>v
+        /// <param name="item">Outputs the value associated with the key. Outputs default if the key was not present.</param>
+        /// <param name="it"> The iterator to be used for <see cref="TryGetNextValue"/>. </param>
+        /// <returns>True if the key was present.</returns>
+        public readonly bool TryGetFirstValue(TIndex2 index2, out TKey key, out TIndex1 index1, out TValue item, out HashMapIterator<TIndex2> it)
+        {
+            this.buffer.CheckReadAccess();
+            this.RefCheck();
+            return this.helper->TryGetFirstValue(index2, out key, out index1, out item, out it);
+        }
+
+        /// <summary> Advances an iterator to the next value associated with its key. </summary>
+        /// <param name="key">>Outputs the next key.</param>
+        /// <param name="index1">Outputs the index1 value.</param>
+        /// <param name="item">Outputs the next value.</param>
+        /// <param name="it">A reference to the iterator to advance.</param>
+        /// <returns>True if the key was present and had another value.</returns>
+        public readonly bool TryGetNextValue(out TKey key, out TIndex1 index1, out TValue item, ref HashMapIterator<TIndex2> it)
+        {
+            this.buffer.CheckReadAccess();
+            this.RefCheck();
+            return this.helper->TryGetNextValue(out key, out index1, out item, ref it);
         }
 
         /// <summary>
         /// Returns an enumerator over the key-value pairs of this hash map.
         /// </summary>
         /// <returns> An enumerator over the key-value pairs of this hash map. </returns>
-        public readonly DynamicIndexedMapEnumerator<TKey, TIndex, TValue> GetEnumerator()
+        public readonly DynamicIndexed2MapEnumerator<TKey, TIndex1, TIndex2, TValue> GetEnumerator()
         {
             this.buffer.CheckReadAccess();
             this.RefCheck();
-            return new DynamicIndexedMapEnumerator<TKey, TIndex, TValue>(this.helper);
+            return new DynamicIndexed2MapEnumerator<TKey, TIndex1, TIndex2, TValue>(this.helper);
         }
 
         public TKey* GetUnsafeKeyPtr()
@@ -228,11 +261,18 @@ namespace BovineLabs.Core.Iterators
             return this.helper->KeyHash.Keys;
         }
 
-        public TIndex* GetUnsafeIndexPtr()
+        public TIndex1* GetUnsafeIndex1Ptr()
         {
             this.buffer.CheckReadAccess();
             this.RefCheck();
-            return this.helper->IndexHash.Keys;
+            return this.helper->IndexHash1.Keys;
+        }
+
+        public TIndex2* GetUnsafeIndex2Ptr()
+        {
+            this.buffer.CheckReadAccess();
+            this.RefCheck();
+            return this.helper->IndexHash2.Keys;
         }
 
         public TValue* GetUnsafeValuePtr()
@@ -247,7 +287,7 @@ namespace BovineLabs.Core.Iterators
         /// </summary>
         /// <returns> Throws NotImplementedException. </returns>
         /// <exception cref="NotImplementedException"> Method is not implemented. </exception>
-        IEnumerator<KIV<TKey, TIndex, TValue>> IEnumerable<KIV<TKey, TIndex, TValue>>.GetEnumerator()
+        IEnumerator<KIV2<TKey, TIndex1, TIndex2, TValue>> IEnumerable<KIV2<TKey, TIndex1, TIndex2, TValue>>.GetEnumerator()
         {
             throw new NotImplementedException();
         }
@@ -281,7 +321,7 @@ namespace BovineLabs.Core.Iterators
                 throw new InvalidOperationException("Buffer not initialized");
             }
 
-            if (buffer.Length < sizeof(DynamicIndexedMapHelper<TKey, TIndex, TValue>))
+            if (buffer.Length < sizeof(DynamicIndexed2MapHelper<TKey, TIndex1, TIndex2, TValue>))
             {
                 throw new InvalidOperationException("Buffer has data but is too small to be a header.");
             }
@@ -304,23 +344,24 @@ namespace BovineLabs.Core.Iterators
         }
     }
 
-    internal sealed unsafe class DynamicIndexedMapDebuggerTypeProxy<TKey, TIndex, TValue>
+    internal sealed unsafe class DynamicIndexed2MapDebuggerTypeProxy<TKey, TIndex1, TIndex2, TValue>
         where TKey : unmanaged, IEquatable<TKey>
-        where TIndex : unmanaged, IEquatable<TIndex>
+        where TIndex1 : unmanaged, IEquatable<TIndex1>
+        where TIndex2 : unmanaged, IEquatable<TIndex2>
         where TValue : unmanaged
     {
-        private readonly DynamicIndexedMapHelper<TKey, TIndex, TValue>* helper;
+        private readonly DynamicIndexed2MapHelper<TKey, TIndex1, TIndex2, TValue>* helper;
 
-        public DynamicIndexedMapDebuggerTypeProxy(DynamicIndexedMap<TKey, TIndex, TValue> target)
+        public DynamicIndexed2MapDebuggerTypeProxy(DynamicIndexed2Map<TKey, TIndex1, TIndex2, TValue> target)
         {
             this.helper = target.Helper;
         }
 
-        public List<Triplet> Items
+        public List<Quadlet> Items
         {
             get
             {
-                var result = new List<Triplet>();
+                var result = new List<Quadlet>();
 
                 if (this.helper == null)
                 {
@@ -331,29 +372,31 @@ namespace BovineLabs.Core.Iterators
 
                 for (var i = 0; i < kva.Keys.Length; ++i)
                 {
-                    result.Add(new Triplet(kva.Keys[i], kva.Indices[i], kva.Values[i]));
+                    result.Add(new Quadlet(kva.Keys[i], kva.Indices1[i], kva.Indices2[i], kva.Values[i]));
                 }
 
                 return result;
             }
         }
 
-        internal readonly struct Triplet
+        internal readonly struct Quadlet
         {
             public readonly TKey Key;
-            public readonly TIndex Index;
+            public readonly TIndex1 Index1;
+            public readonly TIndex2 Index2;
             public readonly TValue Value;
 
-            public Triplet(TKey k, TIndex i, TValue v)
+            public Quadlet(TKey k, TIndex1 i1, TIndex2 i2, TValue v)
             {
                 this.Key = k;
-                this.Index = i;
+                this.Index1 = i1;
+                this.Index2 = i2;
                 this.Value = v;
             }
 
             public override string ToString()
             {
-                return $"{this.Key} : {this.Index} : {this.Value}";
+                return $"{this.Key} : {this.Index1} : {this.Index2} : {this.Value}";
             }
         }
     }

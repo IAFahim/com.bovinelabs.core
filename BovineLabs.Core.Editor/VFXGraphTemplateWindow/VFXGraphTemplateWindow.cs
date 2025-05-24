@@ -46,13 +46,13 @@ namespace BovineLabs.Core.Editor.VFXGraphTemplateWindow
         {
             if (!TryGetPath(out var path))
             {
-                Debug.LogError("No VisualEffectAsset selected");
+                BLDebug.LogErrorString("No VisualEffectAsset selected");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(this.nameField!.value))
             {
-                Debug.LogError("No name set");
+                BLDebug.LogErrorString("No name set");
                 return;
             }
 

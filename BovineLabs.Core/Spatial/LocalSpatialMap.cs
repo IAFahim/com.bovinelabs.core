@@ -162,7 +162,7 @@ namespace BovineLabs.Core.Spatial
                     var min = new int2(-this.HalfSize);
                     var max = new int2(this.HalfSize - 1);
 
-                    Debug.LogError($"Position {position} is outside the size of the world, min={min} max={max}");
+                    BLDebug.LogError512($"Position {position} is outside the size of the world, min={min} max={max}");
                     throw new ArgumentException($"Position {position} is outside the size of the world, min={min} max={max}");
                 }
             }

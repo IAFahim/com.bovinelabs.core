@@ -38,7 +38,7 @@ namespace BovineLabs.Core.Authoring.Blobs
             this.localBlobAssetStore.Dispose();
         }
 
-#if BOVINELABS_ENTITIES_CUSTOM
+#if BL_ENTITIES_CUSTOM
         [BurstCompile]
 #endif
         public void OnUpdate(ref SystemState state)
@@ -92,7 +92,7 @@ namespace BovineLabs.Core.Authoring.Blobs
             {
                 if (!this.tempBlobMap.TryAdd(bakedData.Key, 0))
                 {
-                    Debug.LogError($"Duplicate blob keys added to {entity}. A blob data will be ignored");
+                    BLDebug.LogError512($"Duplicate blob keys added to {entity}. A blob data will be ignored");
                 }
             }
             while (map.TryGetNextValue(out bakedData, ref it));

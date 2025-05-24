@@ -42,7 +42,7 @@ namespace BovineLabs.Core.Utility
         {
             if (state.EntityManager.HasComponent<RequestSceneLoaded>(entity))
             {
-                Debug.LogWarning("Trying to open SubScene that is already open.");
+                BLDebug.LogWarning("Trying to open SubScene that is already open.");
                 return;
             }
 
@@ -64,7 +64,7 @@ namespace BovineLabs.Core.Utility
         {
             if (!state.EntityManager.HasComponent<RequestSceneLoaded>(entity))
             {
-                Debug.LogWarning("Trying to close SubScene that isn't open.");
+                BLDebug.LogWarning("Trying to close SubScene that isn't open.");
                 return;
             }
 
@@ -304,7 +304,7 @@ namespace BovineLabs.Core.Utility
         {
             if (!this.requestSceneLoadeds.HasComponent(entity))
             {
-                Debug.LogWarning("Trying to close SubScene that isn't open.");
+                BLDebug.LogWarning("Trying to close SubScene that isn't open.");
                 return;
             }
 
@@ -325,7 +325,7 @@ namespace BovineLabs.Core.Utility
         {
             if (this.requestSceneLoadeds.HasComponent(entity))
             {
-                Debug.LogWarning("Trying to open SubScene that is already open.");
+                BLDebug.LogWarning("Trying to open SubScene that is already open.");
                 return;
             }
 

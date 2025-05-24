@@ -43,7 +43,7 @@ namespace BovineLabs.Core.Editor.Settings
                 }
                 catch (ArgumentException)
                 {
-                    Debug.LogError($"Multiple panels found for {settings}");
+                    BLDebug.LogErrorString($"Multiple panels found for {settings}");
                 }
             }
 

@@ -37,7 +37,7 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
                     var distinct = notNull.Distinct(default(PrefabDistinct)).ToArray();
                     if (distinct.Length != notNull.Length)
                     {
-                        Debug.LogError("Non-unique object definitions. Make a prefab instance if you need to duplicate one");
+                        BLDebug.LogErrorString("Non-unique object definitions. Make a prefab instance if you need to duplicate one");
                     }
 
                     this.objectDefinitionMap = distinct.ToDictionary(o => o.Prefab!, o => o.ID);
@@ -99,9 +99,9 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
             foreach (var asset in definitions)
             {
                 baker.DependsOn(asset);
-                if (asset.ID != 0 && asset.Prefab == null)
+                if (asset.ID != 0 && !asset.Prefab)
                 {
-                    Debug.LogWarning($"Missing Prefab on {asset}");
+                    BLDebug.LogWarningString($"Missing Prefab on {asset}");
                     continue;
                 }
 

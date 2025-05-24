@@ -250,25 +250,25 @@ namespace BovineLabs.Core.Collections
 
                 if (kx.weightedMode != WeightedMode.None)
                 {
-                    Debug.LogWarning(
+                    BLDebug.LogWarningString(
                         $"Weight Not Supported! X Key[{i},Weight[{kx.weightedMode},In{kx.inWeight},Out{kx.outWeight}],Time{kx.time},Value{kx.value}]");
                 }
 
                 if (ky.weightedMode != WeightedMode.None)
                 {
-                    Debug.LogWarning(
+                    BLDebug.LogWarningString(
                         $"Weight Not Supported! Y Key[{i},Weight[{ky.weightedMode},In{ky.inWeight},Out{ky.outWeight}],Time{ky.time},Value{ky.value}]");
                 }
 
                 if (kz.weightedMode != WeightedMode.None)
                 {
-                    Debug.LogWarning(
+                    BLDebug.LogWarningString(
                         $"Weight Not Supported! Z Key[{i},Weight[{kz.weightedMode},In{kz.inWeight},Out{kz.outWeight}],Time{kz.time},Value{kz.value}]");
                 }
 
                 if (kw.weightedMode != WeightedMode.None)
                 {
-                    Debug.LogWarning(
+                    BLDebug.LogWarningString(
                         $"Weight Not Supported! Z Key[{i},Weight[{kw.weightedMode},In{kw.inWeight},Out{kw.outWeight}],Time{kw.time},Value{kw.value}]");
                 }
             }

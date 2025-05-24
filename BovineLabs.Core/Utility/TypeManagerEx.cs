@@ -7,6 +7,7 @@ namespace BovineLabs.Core.Utility
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+    using BovineLabs.Core.Extensions;
     using Unity.Burst;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
@@ -50,9 +51,7 @@ namespace BovineLabs.Core.Utility
             foreach (var t in allSystemTypes)
             {
                 var typeName = t?.Name ?? "null";
-                FixedString128Bytes fs = default;
-                fs.CopyFromTruncated(typeName); // we just ignore truncated errors
-                systemTypeNames.Add(fs);
+                systemTypeNames.Add(typeName.ToFixedString128NoError());
             }
 
             SharedSystemTypeNames.Ref.Data = new IntPtr(systemTypeNames.Ptr);

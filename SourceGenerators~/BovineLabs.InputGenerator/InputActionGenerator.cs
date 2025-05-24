@@ -180,7 +180,7 @@ namespace BovineLabs.InputGenerator
                             })
                             .Else(e =>
                             {
-                                e.AppendLine($"UnityEngine.Debug.LogWarning(\"InputActionReference for {data.Symbol.Name}.{fieldSymbol.Name} has not been assigned.\");");
+                                e.AppendLine($"BovineLabs.Core.BLDebug.LogWarningString(\"InputActionReference for {data.Symbol.Name}.{fieldSymbol.Name} has not been assigned.\");");
                             })
                             .EndIf();
                     }

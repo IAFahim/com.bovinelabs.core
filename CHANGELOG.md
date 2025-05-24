@@ -14,6 +14,8 @@
 * Rewrote InputGenerator to use CodeGenHelpers
 * Breaking: Input has been moved to its own assembly to scope limit the source generator
 * Analyzers no longer inject in projects that match Unity.*
+* ConfigVars now save on domain reload
+* Replaced all of Core Debug with BLDebug
 
 ### Removed
 * AllTypeIndex from TypeManagerEx to speed up domain reloads

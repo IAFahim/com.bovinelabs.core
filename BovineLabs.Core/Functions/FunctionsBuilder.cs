@@ -99,7 +99,7 @@ namespace BovineLabs.Core.Functions
 
             if (this.functions.Contains(buildData))
             {
-                Debug.LogError($"Trying to add function with hash {hash} multiple times");
+                BLDebug.LogError($"Trying to add function with hash {hash} multiple times");
                 return this;
             }
 

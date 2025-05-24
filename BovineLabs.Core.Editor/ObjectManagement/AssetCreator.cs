@@ -33,7 +33,7 @@ namespace BovineLabs.Core.Editor.ObjectManagement
         {
             if (type.GetCustomAttribute<AutoRefAttribute>() == null)
             {
-                Debug.LogError($"Type {type} is using AssetCreator but without {nameof(AutoRefAttribute)} so the item will not be added to the object.");
+                BLDebug.LogErrorString($"Type {type} is using AssetCreator but without {nameof(AutoRefAttribute)} so the item will not be added to the object.");
             }
 
             this.serializedObject = serializedObject;

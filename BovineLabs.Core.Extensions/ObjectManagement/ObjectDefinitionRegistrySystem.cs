@@ -43,6 +43,7 @@ namespace BovineLabs.Core.ObjectManagement
             this.objectDefinitions.Dispose();
         }
 
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             state.CompleteDependency();
@@ -53,13 +54,14 @@ namespace BovineLabs.Core.ObjectManagement
             this.objectDefinitionsOffsets.Clear();
 
             SystemAPI.GetSingletonRW<ObjectDefinitionRegistry>(); // Trigger change filter
+            var blDebug = SystemAPI.GetSingleton<BLDebug>();
 
             var offsets = 0;
             foreach (var (mod, odr) in SystemAPI.Query<Mod, DynamicBuffer<ObjectDefinitionSetupRegistry>>())
             {
                 if (!this.objectDefinitionsOffsets.TryAdd(mod.Value, offsets))
                 {
-                    Debug.LogError($"Mod with key {mod.Value} already added, skipping duplicate. Inform author of collision.");
+                    blDebug.Error512($"Mod with key {mod.Value} already added, skipping duplicate. Inform author of collision.");
                     continue;
                 }
 

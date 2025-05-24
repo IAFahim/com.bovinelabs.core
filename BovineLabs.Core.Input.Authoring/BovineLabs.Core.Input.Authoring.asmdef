@@ -13,7 +13,6 @@
         "Unity.Entities.Graphics",
         "Unity.Entities.Hybrid",
         "Unity.InputSystem",
-        "Unity.Logging",
         "Unity.Mathematics",
         "Unity.Mathematics.Extensions",
         "Unity.Physics",

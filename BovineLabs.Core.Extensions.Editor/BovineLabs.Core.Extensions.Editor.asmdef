@@ -15,7 +15,6 @@
     "Unity.Entities.UI.Editor",
     "Unity.InternalAPIEditorBridge.002",
     "Unity.InputSystem",
-    "Unity.Logging",
     "Unity.Mathematics",
     "Unity.Mathematics.Extensions",
     "Unity.Physics",

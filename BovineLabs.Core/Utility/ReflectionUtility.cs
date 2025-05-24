@@ -63,7 +63,7 @@ namespace BovineLabs.Core.Utility
                 }
                 catch (ReflectionTypeLoadException)
                 {
-                    Debug.LogWarning($"Unable to load types for assembly {assembly.FullName}");
+                    BLDebug.LogWarningString($"Unable to load types for assembly {assembly.FullName}");
                     types = Array.Empty<Type>();
                 }
 

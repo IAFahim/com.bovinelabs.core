@@ -250,6 +250,17 @@ namespace BovineLabs.Core.Iterators
             return (DynamicIndexedMapHelper<TKey, TIndex, TValue>*)buffer.GetPtr();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static DynamicIndexed2MapHelper<TKey, TIndex1, TIndex2, TValue>* AsIndexed2Helper<TKey, TIndex1, TIndex2, TValue>(this DynamicBuffer<byte> buffer)
+            where TKey : unmanaged, IEquatable<TKey>
+            where TIndex1 : unmanaged, IEquatable<TIndex1>
+            where TIndex2 : unmanaged, IEquatable<TIndex2>
+            where TValue : unmanaged
+        {
+            CheckSize(buffer, sizeof(DynamicIndexed2MapHelper<TKey, TIndex1, TIndex2, TValue>));
+            return (DynamicIndexed2MapHelper<TKey, TIndex1, TIndex2, TValue>*)buffer.GetPtr();
+        }
+
         [Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
         private static void CheckSize<T>(DynamicBuffer<byte> buffer)
             where T : unmanaged
