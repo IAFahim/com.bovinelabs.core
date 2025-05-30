@@ -21,7 +21,7 @@ namespace BovineLabs.Core
         {
             if (Allocators.Data.IsCreated)
             {
-                BLDebug.LogError("allocators weren't cleaned up");
+                BLGlobalLogger.LogError("allocators weren't cleaned up");
                 Dispose();
             }
 

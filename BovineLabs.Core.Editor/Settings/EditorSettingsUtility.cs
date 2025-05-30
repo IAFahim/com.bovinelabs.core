@@ -230,7 +230,7 @@ namespace BovineLabs.Core.Editor.Settings
                 default:
                 {
                     // Error
-                    BLDebug.LogErrorString($"More than 1 instance of {type.Name} found. {string.Join(",", assets)}");
+                    BLGlobalLogger.LogErrorString($"More than 1 instance of {type.Name} found. {string.Join(",", assets)}");
                     var asset = assets.First();
                     instance = AssetDatabase.LoadAssetAtPath<ScriptableObject>(AssetDatabase.GUIDToAssetPath(asset));
                     break;
@@ -284,7 +284,7 @@ namespace BovineLabs.Core.Editor.Settings
             {
                 if (assets.Length > 2)
                 {
-                    BLDebug.LogErrorString($"More than 1 EditorSettings found, using {AssetDatabase.GUIDToAssetPath(assets[0])}");
+                    BLGlobalLogger.LogErrorString($"More than 1 EditorSettings found, using {AssetDatabase.GUIDToAssetPath(assets[0])}");
                 }
 
                 return AssetDatabase.LoadAssetAtPath<EditorSettings>(AssetDatabase.GUIDToAssetPath(assets[0]));

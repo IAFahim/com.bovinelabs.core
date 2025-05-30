@@ -35,7 +35,7 @@ namespace BovineLabs.Core.ObjectManagement
             {
                 if (!this.objectDefinitionsOffsets.TryGetValue(id.Mod, out var offset))
                 {
-                    BLDebug.LogWarning($"Loading object from mod {id.Mod} that wasn't loaded");
+                    BLGlobalLogger.LogWarning($"Loading object from mod {id.Mod} that wasn't loaded");
                     return Entity.Null;
                 }
 
@@ -43,7 +43,7 @@ namespace BovineLabs.Core.ObjectManagement
 
                 if (index < 0 || index >= this.objectDefinitions.Length)
                 {
-                    BLDebug.LogWarning($"Index for ObjectId {id.Mod} {id.ID} was out of range");
+                    BLGlobalLogger.LogWarning($"Index for ObjectId {id.Mod} {id.ID} was out of range");
                     return Entity.Null;
                 }
 

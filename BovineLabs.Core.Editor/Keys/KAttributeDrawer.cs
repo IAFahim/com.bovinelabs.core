@@ -24,7 +24,7 @@ namespace BovineLabs.Core.Editor.Keys
             var type = TryGetType(attr.Settings);
             if (type == null)
             {
-                BLDebug.LogWarningString($"KAttribute could not find settings {attr.Settings}. Please check spelling and capitalization.");
+                BLGlobalLogger.LogWarningString($"KAttribute could not find settings {attr.Settings}. Please check spelling and capitalization.");
                 return null;
             }
 
@@ -64,7 +64,7 @@ namespace BovineLabs.Core.Editor.Keys
                 return us.Keys.Select(k => (k.Name, (int)k.Value));
             }
 
-            BLDebug.LogWarningString("KAttribute is currently only supported on int, uint, byte, sbyte, short and ushort.");
+            BLGlobalLogger.LogWarningString("KAttribute is currently only supported on int, uint, byte, sbyte, short and ushort.");
 
             return null;
         }

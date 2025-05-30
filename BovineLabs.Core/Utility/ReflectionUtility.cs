@@ -8,7 +8,6 @@ namespace BovineLabs.Core.Utility
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Unity;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.Profiling;
@@ -63,7 +62,7 @@ namespace BovineLabs.Core.Utility
                 }
                 catch (ReflectionTypeLoadException)
                 {
-                    BLDebug.LogWarningString($"Unable to load types for assembly {assembly.FullName}");
+                    BLGlobalLogger.LogWarningString($"Unable to load types for assembly {assembly.FullName}");
                     types = Array.Empty<Type>();
                 }
 

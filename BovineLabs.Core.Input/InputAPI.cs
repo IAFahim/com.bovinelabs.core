@@ -18,7 +18,7 @@ namespace BovineLabs.Core.Input
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void InputEnable(ref SystemState systemState, FixedString32Bytes input)
         {
-            systemState.EntityManager.GetSingleton<BLDebug>(false).Debug($"Input enabled {input}");
+            systemState.EntityManager.GetSingleton<BLLogger>(false).LogDebug($"Input enabled {input}");
             InputEnable(ref systemState, input, true);
         }
 
@@ -29,7 +29,7 @@ namespace BovineLabs.Core.Input
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void InputDisable(ref SystemState systemState, FixedString32Bytes input)
         {
-            systemState.EntityManager.GetSingleton<BLDebug>(false).Debug($"Input disabled {input}");
+            systemState.EntityManager.GetSingleton<BLLogger>(false).LogDebug($"Input disabled {input}");
             InputEnable(ref systemState, input, false);
         }
 

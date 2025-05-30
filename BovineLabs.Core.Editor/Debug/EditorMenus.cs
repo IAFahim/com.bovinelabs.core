@@ -46,8 +46,8 @@ namespace BovineLabs.Core.Editor
 
         private static LogLevel BLLogLevel
         {
-            get => (LogLevel)BLDebug.CurrentLogLevel.Data;
-            set => BLDebug.CurrentLogLevel.Data = (int)value;
+            get => (LogLevel)BLLogger.CurrentLogLevel.Data;
+            set => BLLogger.CurrentLogLevel.Data = (int)value;
         }
 
         [MenuItem(DebugLevelVerboseBLMenuEnabled, false, priority = -40)]

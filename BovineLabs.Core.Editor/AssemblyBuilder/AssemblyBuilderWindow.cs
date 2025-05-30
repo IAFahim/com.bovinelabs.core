@@ -151,7 +151,7 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
 
             if (string.IsNullOrWhiteSpace(nameField))
             {
-                BLDebug.LogErrorString($"AssemblyName '{nameField}' is invalid");
+                BLGlobalLogger.LogErrorString($"AssemblyName '{nameField}' is invalid");
                 return;
             }
 
@@ -167,14 +167,14 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
 
                 if (AssetDatabase.IsValidFolder(folder))
                 {
-                    BLDebug.LogErrorString($"MenuPath {folder} already exists");
+                    BLGlobalLogger.LogErrorString($"MenuPath {folder} already exists");
                     continue;
                 }
 
                 var result = AssetDatabase.CreateFolder(activeFolderPath, assemblyName);
                 if (string.IsNullOrWhiteSpace(result))
                 {
-                    BLDebug.LogErrorString($"Unable to create folder: {activeFolderPath} assembly name: {assemblyName}");
+                    BLGlobalLogger.LogErrorString($"Unable to create folder: {activeFolderPath} assembly name: {assemblyName}");
                     return;
                 }
 

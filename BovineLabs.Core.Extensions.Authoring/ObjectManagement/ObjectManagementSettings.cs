@@ -39,7 +39,7 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
 
             if (!objectCategories)
             {
-                BLDebug.LogWarningString("Categories missing");
+                BLGlobalLogger.LogWarningString("Categories missing");
                 return;
             }
 
@@ -55,13 +55,13 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
 
                 if (!unique.Add(c.Value))
                 {
-                    BLDebug.LogWarningString($"Duplicate entries for {c.Value}");
+                    BLGlobalLogger.LogWarningString($"Duplicate entries for {c.Value}");
                     continue;
                 }
 
                 if (c.Value >= ObjectCategory.MaxBits)
                 {
-                    BLDebug.LogWarningString($"Value outside bit field range {c.Value}");
+                    BLGlobalLogger.LogWarningString($"Value outside bit field range {c.Value}");
                     continue;
                 }
 

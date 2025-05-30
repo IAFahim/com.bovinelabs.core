@@ -122,7 +122,7 @@ namespace BovineLabs.Core.Editor
                             continue;
                         }
 
-                        BLDebug.LogInfoString($"{c.name} unknown format");
+                        BLGlobalLogger.LogInfoString($"{c.name} unknown format");
                         continue;
                     }
 

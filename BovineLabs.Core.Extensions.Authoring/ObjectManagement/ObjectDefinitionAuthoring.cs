@@ -64,7 +64,7 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
 
                 if (!objectCategories)
                 {
-                    BLDebug.LogWarningString("Categories missing");
+                    BLGlobalLogger.LogWarningString("Categories missing");
                     return categoryToComponentTypes;
                 }
 
@@ -78,7 +78,7 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
 
                     if (!categoryToComponentTypes.TryAdd(c.Value, ComponentType.FromTypeIndex(typeIndex)))
                     {
-                        BLDebug.LogWarningString($"Duplicate entries for {c.Value}");
+                        BLGlobalLogger.LogWarningString($"Duplicate entries for {c.Value}");
                     }
                 }
 

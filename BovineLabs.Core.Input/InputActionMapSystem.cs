@@ -54,7 +54,7 @@ namespace BovineLabs.Core.Input
             var actionMap = inputAsset.Value.FindActionMap(input.ToString());
             if (actionMap == null)
             {
-                SystemAPI.GetSingleton<BLDebug>().Warning($"Unable to find action map of name {input}");
+                SystemAPI.GetSingleton<BLLogger>().LogWarning($"Unable to find action map of name {input}");
                 return;
             }
 

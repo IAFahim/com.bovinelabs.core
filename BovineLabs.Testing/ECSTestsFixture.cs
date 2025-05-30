@@ -44,7 +44,7 @@ namespace BovineLabs.Testing
             this.jobsDebuggerWasEnabled = JobsUtility.JobDebuggerEnabled;
             JobsUtility.JobDebuggerEnabled = true;
 
-            this.Manager.CreateEntity(typeof(BLDebug));
+            this.Manager.CreateEntity(typeof(BLLogger));
 
 #if (UNITY_EDITOR || DEVELOPMENT_BUILD) && !DISABLE_ENTITIES_JOURNALING
             // In case entities journaling is initialized, clear it

@@ -24,19 +24,19 @@ namespace BovineLabs.Core.Editor.UI
             {
                 if (!m.IsStatic)
                 {
-                    BLDebug.LogErrorString($"{nameof(EditorToolbarAttribute)} is not on a static method");
+                    BLGlobalLogger.LogErrorString($"{nameof(EditorToolbarAttribute)} is not on a static method");
                     continue;
                 }
 
                 if (m.ReturnType != typeof(VisualElement))
                 {
-                    BLDebug.LogErrorString($"{nameof(EditorToolbarAttribute)} returns a method returning {nameof(VisualElement)}");
+                    BLGlobalLogger.LogErrorString($"{nameof(EditorToolbarAttribute)} returns a method returning {nameof(VisualElement)}");
                     continue;
                 }
 
                 if (m.GetParameters().Length != 0)
                 {
-                    BLDebug.LogErrorString($"{nameof(EditorToolbarAttribute)} must have a parameterless a method");
+                    BLGlobalLogger.LogErrorString($"{nameof(EditorToolbarAttribute)} must have a parameterless a method");
                     continue;
                 }
 

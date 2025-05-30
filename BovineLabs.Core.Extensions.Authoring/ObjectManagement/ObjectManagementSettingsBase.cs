@@ -37,7 +37,7 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
                     var distinct = notNull.Distinct(default(PrefabDistinct)).ToArray();
                     if (distinct.Length != notNull.Length)
                     {
-                        BLDebug.LogErrorString("Non-unique object definitions. Make a prefab instance if you need to duplicate one");
+                        BLGlobalLogger.LogErrorString("Non-unique object definitions. Make a prefab instance if you need to duplicate one");
                     }
 
                     this.objectDefinitionMap = distinct.ToDictionary(o => o.Prefab!, o => o.ID);
@@ -88,7 +88,7 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
             baker.AddComponent(entity, new Mod(this.Mod));
             var registry = baker.AddBuffer<ObjectDefinitionSetupRegistry>(entity);
 
-            var definitions = this.ObjectDefinitions.Where(o => o != null).ToList();
+            var definitions = this.ObjectDefinitions.Where(o => o).ToList();
 
             // Get the largest ID and resize the array to fit
             // The importer should keep this close to the number of prefabs
@@ -101,7 +101,7 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
                 baker.DependsOn(asset);
                 if (asset.ID != 0 && !asset.Prefab)
                 {
-                    BLDebug.LogWarningString($"Missing Prefab on {asset}");
+                    BLGlobalLogger.LogWarningString($"Missing Prefab on {asset}");
                     continue;
                 }
 
@@ -122,7 +122,7 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
 
             foreach (var group in this.ObjectGroups)
             {
-                if (group == null)
+                if (!group)
                 {
                     continue;
                 }
@@ -160,7 +160,7 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
 
             foreach (var d in this.ObjectDefinitions)
             {
-                if (d == null || d.Prefab == null)
+                if (!d || !d.Prefab)
                 {
                     continue;
                 }

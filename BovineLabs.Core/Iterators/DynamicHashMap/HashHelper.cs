@@ -5,61 +5,36 @@
 namespace BovineLabs.Core.Iterators
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
     using BovineLabs.Core.Assertions;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
 
-    internal readonly unsafe ref struct HashHelper<TKey>
+    [SuppressMessage("ReSharper", "PrivateFieldCanBeConvertedToLocalVariable")]
+    internal unsafe struct HashHelper<TKey>
         where TKey : unmanaged, IEquatable<TKey>
     {
-        private readonly int keysOffset;
+        private readonly int keyOffset;
         private readonly int nextOffset;
         private readonly int bucketsOffset;
 
-        public HashHelper(byte* parentPtr, HashHelper<TKey>* thisPtr, int hashMapDataSize, int keyOffset, int nextOffset, int bucketOffset)
+        public HashHelper(byte* parentPtr, HashHelper<TKey>* thisPtr, int hashMapDataSize, int keyOffset, int nextOffset, int bucketsOffset)
         {
             var ptr = (byte*)thisPtr;
             var offset = (int)(ptr - parentPtr);
             Check.Assume(offset < int.MaxValue);
 
-            this.keysOffset = (hashMapDataSize + keyOffset) - offset;
+            this.keyOffset = (hashMapDataSize + keyOffset) - offset;
             this.nextOffset = (hashMapDataSize + nextOffset) - offset;
-            this.bucketsOffset = (hashMapDataSize + bucketOffset) - offset;
+            this.bucketsOffset = (hashMapDataSize + bucketsOffset) - offset;
         }
 
-        public TKey* Keys
-        {
-            get
-            {
-                fixed (HashHelper<TKey>* data = &this)
-                {
-                    return (TKey*)((byte*)data + data->keysOffset);
-                }
-            }
-        }
+        public TKey* Keys => (TKey*)((byte*)UnsafeUtility.AddressOf(ref this) + this.keyOffset);
 
-        public int* Next
-        {
-            get
-            {
-                fixed (HashHelper<TKey>* data = &this)
-                {
-                    return (int*)((byte*)data + data->nextOffset);
-                }
-            }
-        }
+        public int* Next => (int*)((byte*)UnsafeUtility.AddressOf(ref this) + this.nextOffset);
 
-        public int* Buckets
-        {
-            get
-            {
-                fixed (HashHelper<TKey>* data = &this)
-                {
-                    return (int*)((byte*)data + data->bucketsOffset);
-                }
-            }
-        }
+        public int* Buckets => (int*)((byte*)UnsafeUtility.AddressOf(ref this) + this.bucketsOffset);
 
         public void Clear(int capacity, int bucketCapacity)
         {

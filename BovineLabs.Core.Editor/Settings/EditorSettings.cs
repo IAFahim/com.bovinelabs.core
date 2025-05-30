@@ -24,7 +24,7 @@ namespace BovineLabs.Core.Editor.Settings
         [SerializeField]
         private KeyPath[] paths = Array.Empty<KeyPath>();
 
-#if !BL_DISABLE_SUBSCENE
+#if BL_CORE_EXTENSIONS && !BL_DISABLE_SUBSCENE
         [Header("Scenes")]
         [SerializeField]
         private SceneAsset[] prebakeScenes = Array.Empty<SceneAsset>();
@@ -40,7 +40,7 @@ namespace BovineLabs.Core.Editor.Settings
         [SerializeField]
         private KeyAuthoring[] settingAuthoring = { new() { World = "service" } };
 
-#if !BL_DISABLE_SUBSCENE
+#if BL_CORE_EXTENSIONS && !BL_DISABLE_SUBSCENE
         public IReadOnlyList<SceneAsset> PrebakeScenes => this.prebakeScenes;
 
         public SceneAsset? StartupScene => this.startupScene;

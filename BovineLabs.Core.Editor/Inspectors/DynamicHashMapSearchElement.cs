@@ -109,7 +109,7 @@ namespace BovineLabs.Core.Editor.Inspectors
 
             if (data is not TKey key)
             {
-                BLDebug.LogErrorString($"List item {data} was not type of {typeof(TKey)}");
+                BLGlobalLogger.LogErrorString($"List item {data} was not type of {typeof(TKey)}");
                 return;
             }
 

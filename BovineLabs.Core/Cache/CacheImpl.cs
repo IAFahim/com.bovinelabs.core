@@ -115,7 +115,7 @@ namespace BovineLabs.Core.Cache
                 {
                     if (cleanup[i].Ptr == null)
                     {
-                        BLDebug.LogError("Null cache how?");
+                        BLGlobalLogger.LogError("Null cache how?");
                         continue;
                     }
 
@@ -123,7 +123,7 @@ namespace BovineLabs.Core.Cache
 
                     if (!this.allocated.Remove(cache))
                     {
-                        BLDebug.LogError("Somehow cache was not stored");
+                        BLGlobalLogger.LogError("Somehow cache was not stored");
                     }
 
                     UnsafeList<TC>.Destroy(cache);

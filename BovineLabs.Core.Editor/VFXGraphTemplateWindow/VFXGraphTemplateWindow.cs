@@ -46,13 +46,13 @@ namespace BovineLabs.Core.Editor.VFXGraphTemplateWindow
         {
             if (!TryGetPath(out var path))
             {
-                BLDebug.LogErrorString("No VisualEffectAsset selected");
+                BLGlobalLogger.LogErrorString("No VisualEffectAsset selected");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(this.nameField!.value))
             {
-                BLDebug.LogErrorString("No name set");
+                BLGlobalLogger.LogErrorString("No name set");
                 return;
             }
 
@@ -67,7 +67,7 @@ namespace BovineLabs.Core.Editor.VFXGraphTemplateWindow
         private static bool TryGetPath(out string? path)
         {
             var asset = Selection.activeObject as VisualEffectAsset;
-            if (asset == null)
+            if (!asset)
             {
                 path = null;
                 return false;

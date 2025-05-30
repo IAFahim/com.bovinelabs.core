@@ -92,7 +92,7 @@ namespace BovineLabs.Core.Authoring.Blobs
             {
                 if (!this.tempBlobMap.TryAdd(bakedData.Key, 0))
                 {
-                    BLDebug.LogError512($"Duplicate blob keys added to {entity}. A blob data will be ignored");
+                    BLGlobalLogger.LogError512($"Duplicate blob keys added to {entity}. A blob data will be ignored");
                 }
             }
             while (map.TryGetNextValue(out bakedData, ref it));

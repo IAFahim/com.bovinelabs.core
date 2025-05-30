@@ -21,7 +21,7 @@ namespace BovineLabs.Core.Authoring.SubScenes
             {
                 if (!authoring.settings)
                 {
-                    BLDebug.LogErrorString("SubSceneSettings not assigned");
+                    BLGlobalLogger.LogErrorString("SubSceneSettings not assigned");
                     return;
                 }
 

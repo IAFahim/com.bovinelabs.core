@@ -31,7 +31,7 @@ namespace BovineLabs.Core.Editor.ObjectManagement
             }
             else if (authoring.Definition != objectDefinition)
             {
-                BLDebug.LogErrorString($"{objectDefinition} and it's target prefab {authoring} don't match. This likely means it's being used in 2 places.");
+                BLGlobalLogger.LogErrorString($"{objectDefinition} and it's target prefab {authoring} don't match. This likely means it's being used in 2 places.");
 
                 return false;
             }
@@ -74,7 +74,7 @@ namespace BovineLabs.Core.Editor.ObjectManagement
             var to = evt.changedProperty.serializedObject.targetObject as ObjectDefinition;
             if (!to)
             {
-                BLDebug.LogErrorString("target is not a ObjectDefinition");
+                BLGlobalLogger.LogErrorString("target is not a ObjectDefinition");
                 return;
             }
 

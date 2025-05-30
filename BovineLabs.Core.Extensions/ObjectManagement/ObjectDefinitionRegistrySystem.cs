@@ -54,14 +54,14 @@ namespace BovineLabs.Core.ObjectManagement
             this.objectDefinitionsOffsets.Clear();
 
             SystemAPI.GetSingletonRW<ObjectDefinitionRegistry>(); // Trigger change filter
-            var blDebug = SystemAPI.GetSingleton<BLDebug>();
+            var blDebug = SystemAPI.GetSingleton<BLLogger>();
 
             var offsets = 0;
             foreach (var (mod, odr) in SystemAPI.Query<Mod, DynamicBuffer<ObjectDefinitionSetupRegistry>>())
             {
                 if (!this.objectDefinitionsOffsets.TryAdd(mod.Value, offsets))
                 {
-                    blDebug.Error512($"Mod with key {mod.Value} already added, skipping duplicate. Inform author of collision.");
+                    blDebug.LogError512($"Mod with key {mod.Value} already added, skipping duplicate. Inform author of collision.");
                     continue;
                 }
 

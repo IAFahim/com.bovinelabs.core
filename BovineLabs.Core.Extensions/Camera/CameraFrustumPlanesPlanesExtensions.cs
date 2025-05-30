@@ -91,7 +91,7 @@ namespace BovineLabs.Core.Camera
             var determinant = math.dot(p1.xyz, cross23);
             if (math.abs(determinant) < math.EPSILON)
             {
-                BLDebug.LogError("Planes do not intersect properly (parallel or coincident planes).");
+                BLGlobalLogger.LogError("Planes do not intersect properly (parallel or coincident planes).");
                 return float3.zero;
             }
 
