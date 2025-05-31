@@ -58,13 +58,12 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
 
         public static implicit operator int(ObjectDefinition? definition)
         {
-            return definition != null ? definition.id : default;
+            return definition ? definition.id : 0;
         }
 
         public static implicit operator ObjectId(ObjectDefinition? definition)
         {
-            // TODO get the mod
-            return definition == null ? default : new ObjectId(0, definition.id);
+            return definition ? new ObjectId(definition.id) : default;
         }
     }
 }

@@ -7,7 +7,8 @@
 * A Unity compatible and updated version of CodeGenHelpers https://github.com/dansiegel/CodeGenHelpers to use with source generators
 * Source Generator for generating IDynamic[HashMap|HashSet|IndexedMap|MultiHashMap|UntypedHashMap] Initialize and AsMap methods
 * ProfilerTimer for quick easy scoped Timing
-* Added BLGlobalLogger
+* BLGlobalLogger
+* SubScenePostLoadCommandBufferSystem for allowing setup of PostLoadCommandBuffer from multiple places
 
 ### Changed
 * Scope limited source generators
@@ -20,6 +21,9 @@
 * Named BLDebug to BLLogger and prefixed all BLDebug methods with Log; this now means you can double click Console to directly go to the correct stack
 * Replaced all of Core Debug with BLLogger
 * Performance optimizations to ObjectManagermentProcessor
+* ObjectId is again just an int
+* ObjectDefinitions no longer use Mod keys
+* SubSceneSet ID is now a struct SubSceneSetId not an int
 
 ### Removed
 * AllTypeIndex from TypeManagerEx to speed up domain reloads

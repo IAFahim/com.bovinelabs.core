@@ -14,6 +14,8 @@ namespace BovineLabs.Core.ConfigVars
     using Debug = UnityEngine.Debug;
 #if UNITY_EDITOR
     using UnityEditor;
+#else
+    using UnityEngine;
 #endif
 
     /// <summary> The manager for the config vars. Is pretty automated. </summary>

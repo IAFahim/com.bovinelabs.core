@@ -23,8 +23,6 @@ namespace BovineLabs.Core.Authoring.ObjectManagement
         [SerializeField]
         private ObjectGroup[] objectGroups = Array.Empty<ObjectGroup>();
 
-        public override int Mod => 0;
-
         public override IReadOnlyCollection<ObjectDefinition> ObjectDefinitions => this.objectDefinitions;
 
         public override IReadOnlyCollection<ObjectGroup> ObjectGroups => this.objectGroups;

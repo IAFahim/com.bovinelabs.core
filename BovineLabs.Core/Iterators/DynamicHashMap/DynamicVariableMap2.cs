@@ -182,14 +182,14 @@ namespace BovineLabs.Core.Iterators
             return ref UnsafeUtility.ArrayElementAsRef<TValue>(this.helper->Values, idx);
         }
 
-        public readonly void ReplaceColumn(int idx, T1 column)
+        public readonly void ReplaceColumn1(int idx, T1 column)
         {
             this.buffer.CheckWriteAccess();
             this.RefCheck();
             this.helper->Column1.Replace(column, idx);
         }
 
-        public readonly void ReplaceColumn(int idx, T2 column)
+        public readonly void ReplaceColumn2(int idx, T2 column)
         {
             this.buffer.CheckWriteAccess();
             this.RefCheck();

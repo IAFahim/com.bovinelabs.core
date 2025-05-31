@@ -437,6 +437,58 @@ namespace BovineLabs.Core.Tests.Iterators.Columns
             Assert.AreEqual(100, key);
         }
 
+[Test]
+        public void RemoveInternal_WhenRemovingNonFirstItemInBucket_ShouldNotCauseInfiniteLoop()
+        {
+            var map = this.CreateMap();
+
+            // Add multiple items that might hash to the same bucket
+            // Using a small initial capacity to increase collision likelihood
+            map.Capacity = 16;
+
+            // Add items with the same column value
+            const short columnValue = 42;
+            var addedKeys = new List<int>();
+
+            // Keep adding items until we get some that hash to the same bucket
+            for (int i = 0; i < 100; i++)
+            {
+                map.Add(i, i * 0.5f, columnValue);
+                addedKeys.Add(i);
+            }
+
+            // Remove items in reverse order to ensure we're removing non-first items
+            for (int i = addedKeys.Count - 1; i >= 0; i--)
+            {
+                var keyToRemove = addedKeys[i];
+
+                // This should not cause an infinite loop
+                var removed = map.Remove(keyToRemove);
+                Assert.IsTrue(removed, $"Should successfully remove key {keyToRemove}");
+
+                // Verify the key is no longer in the map
+                Assert.IsFalse(map.ContainsKey(keyToRemove), $"Key {keyToRemove} should not exist after removal");
+
+                // Verify we can still find other items with the same column value
+                var remainingCount = 0;
+                if (map.Column.TryGetFirst(columnValue, out var it))
+                {
+                    remainingCount++;
+                    while (map.Column.TryGetNext(ref it))
+                    {
+                        remainingCount++;
+                    }
+                }
+
+                Assert.AreEqual(i, remainingCount,
+                    $"Should have {i} items remaining after removing {addedKeys.Count - i} items");
+            }
+
+            // Verify the column is completely empty
+            Assert.IsFalse(map.Column.TryGetFirst(columnValue, out _),
+                "Should not find any entries after removing all items");
+        }
+
         private DynamicVariableMap<int, float, short, MultiHashColumn<short>> CreateMap(int growth = 64)
         {
             var entity = this.Manager.CreateEntity(typeof(TestMap));

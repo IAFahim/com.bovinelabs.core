@@ -193,10 +193,8 @@ namespace BovineLabs.Core.SubScenes
                     var sceneGuid = scene.Scene.SceneGUID();
                     var sceneEntity = SceneSystem.LoadSceneAsync(state.WorldUnmanaged, sceneGuid, loadingParams);
 
-                    state
-                    .EntityManager
-                    .GetBuffer<SubSceneEntity>(entity)
-                    .Add(new SubSceneEntity
+                    var subSceneEntityBuffer = state.EntityManager.GetBuffer<SubSceneEntity>(entity);
+                    subSceneEntityBuffer.Add(new SubSceneEntity
                     {
                         Entity = sceneEntity,
                         Scene = sceneGuid,

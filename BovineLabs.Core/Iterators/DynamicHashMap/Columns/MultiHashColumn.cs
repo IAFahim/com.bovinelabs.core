@@ -167,28 +167,30 @@ namespace BovineLabs.Core.Iterators.Columns
             // We need to iterate until we find the same index
             var index = UnsafeUtility.ReadArrayElement<T>(this.Keys, idx);
 
-            var indexBucket = GetBucket(index, bucketCapacityMask);
-            var indexPrevEntry = -1;
-            var indexEntryIdx = this.Buckets[indexBucket];
+            var bucket = GetBucket(index, bucketCapacityMask);
+            var prevEntry = -1;
+            var entryIdx = this.Buckets[bucket];
 
-            while (idx != indexEntryIdx)
+            while (entryIdx != idx)
             {
-                indexPrevEntry = indexEntryIdx;
-                indexEntryIdx = this.Next[indexEntryIdx];
+                prevEntry = entryIdx;
+                entryIdx = this.Next[entryIdx];
+
+                Check.Assume(entryIdx != -1);
             }
 
             // Found matching element, remove it
-            if (indexPrevEntry < 0)
+            if (prevEntry < 0)
             {
-                this.Buckets[indexBucket] = this.Next[indexEntryIdx];
+                this.Buckets[bucket] = this.Next[entryIdx];
             }
             else
             {
-                this.Next[indexPrevEntry] = this.Next[indexEntryIdx];
+                this.Next[prevEntry] = this.Next[entryIdx];
             }
 
             // And free the index
-            this.Next[indexEntryIdx] = this.Next[idx];
+            this.Next[entryIdx] = -1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -220,7 +222,7 @@ namespace BovineLabs.Core.Iterators.Columns
             public Resize(ref MultiHashColumn<T> column)
             {
                 this.oldCapacity = column.capacity;
-                this.oldBucketCapacity = GetBucketCapacityMask(column.capacity);
+                this.oldBucketCapacity = GetBucketCapacity(column.capacity);
                 this.oldKeys = (T*)UnsafeUtility.Malloc(this.oldCapacity * sizeof(T), UnsafeUtility.AlignOf<T>(), Allocator.Temp);
                 this.oldNext = (int*)UnsafeUtility.Malloc(this.oldCapacity * sizeof(int), UnsafeUtility.AlignOf<int>(), Allocator.Temp);
                 this.oldBuckets = (int*)UnsafeUtility.Malloc(this.oldBucketCapacity * sizeof(int), UnsafeUtility.AlignOf<int>(), Allocator.Temp);
@@ -248,21 +250,19 @@ namespace BovineLabs.Core.Iterators.Columns
                 var buckets = helper.Buckets;
 
                 UnsafeUtility.MemCpy(keys, this.oldKeys, this.oldCapacity * sizeof(T));
-                UnsafeUtility.MemCpy(next, this.oldNext, this.oldCapacity * sizeof(int));
-                UnsafeUtility.MemSet(next + this.oldCapacity, 0xff, (helper.capacity - this.oldCapacity) * sizeof(int));
 
                 // re-hash the buckets, first clear the new bucket list, then insert all values from the old list
+                UnsafeUtility.MemSet(next, 0xff, helper.capacity * sizeof(int));
                 UnsafeUtility.MemSet(buckets, 0xff, newBucketCapacity * sizeof(int));
 
-                for (var bucket = 0; bucket < this.oldBucketCapacity; ++bucket)
+                for (int i = 0; i < this.oldBucketCapacity; i++)
                 {
-                    while (this.oldBuckets[bucket] >= 0)
+                    for (var idx = this.oldBuckets[i]; idx != -1; idx = this.oldNext[idx])
                     {
-                        var curEntry = this.oldBuckets[bucket];
-                        this.oldBuckets[bucket] = next[curEntry];
-                        var newBucket = GetBucket(this.oldKeys[curEntry], newBucketCapacityMask);
-                        next[curEntry] = buckets[newBucket];
-                        buckets[newBucket] = curEntry;
+                        var bucket = GetBucket(this.oldKeys[idx], newBucketCapacityMask);
+
+                        next[idx] = buckets[bucket];
+                        buckets[bucket] = idx;
                     }
                 }
             }

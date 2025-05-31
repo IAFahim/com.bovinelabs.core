@@ -98,7 +98,7 @@ namespace BovineLabs.Core.SubScenes
 
             this.EntityManager.SetComponentData(entity, new SubSceneLoadData
             {
-                ID = -1,
+                ID = new SubSceneSetId(-1),
                 IsRequired = subScene.AutoLoadScene,
                 WaitForLoad = subScene.AutoLoadScene,
                 TargetWorld = this.World.Flags,
