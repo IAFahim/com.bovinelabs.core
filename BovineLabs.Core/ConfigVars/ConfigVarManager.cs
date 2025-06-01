@@ -61,7 +61,7 @@ namespace BovineLabs.Core.ConfigVars
 
 #if UNITY_EDITOR
             EditorApplication.quitting += Shutdown;
-            AppDomain.CurrentDomain.DomainUnload += (_, __) => Shutdown();
+            AppDomain.CurrentDomain.DomainUnload += (_, _) => Shutdown();
 #else
             Application.quitting += Shutdown;
 #endif

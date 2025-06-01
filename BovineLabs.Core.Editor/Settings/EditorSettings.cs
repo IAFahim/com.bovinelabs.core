@@ -79,7 +79,7 @@ namespace BovineLabs.Core.Editor.Settings
             world = world.ToLower();
 
             authoring = this.settingAuthoring.FirstOrDefault(k => k.World.ToLower() == world)?.Authoring;
-            return authoring != null;
+            return authoring;
         }
 
         [Serializable]

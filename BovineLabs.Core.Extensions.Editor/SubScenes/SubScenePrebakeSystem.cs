@@ -25,7 +25,7 @@ namespace BovineLabs.Core.Editor.SubScenes
                     continue;
                 }
 
-                if (!AssetDatabase.TryGetGUIDAndLocalFileIdentifier(scene, out var guid, out var id))
+                if (!AssetDatabase.TryGetGUIDAndLocalFileIdentifier(scene, out var guid, out _))
                 {
                     continue;
                 }

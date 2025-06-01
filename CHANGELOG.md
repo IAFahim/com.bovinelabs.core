@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.4.3] - 2025-05-30
+## [1.4.3] - 2025-06-01
 
 ### Added
 * ComponentAsset and ComponentFieldAsset for more stable type and fields instead of directly storing StableTypeHash and Offsets
@@ -9,6 +9,7 @@
 * ProfilerTimer for quick easy scoped Timing
 * BLGlobalLogger
 * SubScenePostLoadCommandBufferSystem for allowing setup of PostLoadCommandBuffer from multiple places
+* Added BL_TOOLS_MENU if you want to move the BovineLabs menu to Tools/BovineLabs
 
 ### Changed
 * Scope limited source generators

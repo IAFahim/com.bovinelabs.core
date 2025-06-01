@@ -41,7 +41,7 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
             ViewMode = getProjectBrowserIfExistsMethod!.ReturnType.GetField("m_ViewMode", BindingFlags.Instance | BindingFlags.NonPublic)!;
         }
 
-        [MenuItem("BovineLabs/Tools/Assembly Builder", priority = 1007)]
+        [MenuItem(EditorMenus.RootMenuTools + "Assembly Builder", priority = 1007)]
         private static void ShowWindow()
         {
             // Get existing open window or if none, make a new one:

@@ -10,13 +10,16 @@ namespace BovineLabs.Core.Editor
     using Unity.Editor.Bridge;
     using Unity.Entities.Editor;
     using UnityEditor;
-    using UnityEngine;
     using Resources = UnityEngine.Resources;
 
     public static class EditorMenus
     {
-        private const string RootMenu = "BovineLabs/";
-        private const string RootToolsMenu = RootMenu + "Tools/";
+#if BL_TOOLS_MENU
+        public const string RootMenu = "Tools/BovineLabs/";
+#else
+        public const string RootMenu = "BovineLabs/";
+#endif
+        public const string RootMenuTools = RootMenu + "Tools/";
 
         private const string LogLevelBLMenu = RootMenu + "Logging/";
         private const string DebugLevelVerboseBLMenuEnabled = LogLevelBLMenu + "6. Verbose";
@@ -26,7 +29,7 @@ namespace BovineLabs.Core.Editor
         private const string DebugLevelErrorBLMenuEnabled = LogLevelBLMenu + "2. Error";
         private const string DebugLevelFatalBLMenuEnabled = LogLevelBLMenu + "1. Fatal";
 
-        private const string DataModeSharedMenu = RootToolsMenu + "DataMode/";
+        private const string DataModeSharedMenu = RootMenuTools + "DataMode/";
 
         private const string DataModeMenu = DataModeSharedMenu + "Inspector/";
         private const string DataModeDisabled = DataModeMenu + "Automatic";
@@ -40,7 +43,7 @@ namespace BovineLabs.Core.Editor
         private const string DataModeHierarchyMixed = DataModeHierarchyMenu + "Mixed";
         private const string DataModeHierarchyRuntime = DataModeHierarchyMenu + "Runtime";
 
-        private const string PrefabLoading = RootToolsMenu + "Load Prefabs as Entities";
+        private const string PrefabLoading = RootMenuTools + "Load Prefabs as Entities";
 
         private static LogLevel defaultLevel;
 

@@ -25,7 +25,7 @@ namespace BovineLabs.Core.Editor.Dependency
 
         protected override string DefaultButtonText => "Systems";
 
-        [MenuItem("BovineLabs/Tools/System Dependencies")]
+        [MenuItem(EditorMenus.RootMenuTools + "System Dependencies")]
         public static void OpenWindow()
         {
             GetWindow<SystemDependencyWindow>().Show();
