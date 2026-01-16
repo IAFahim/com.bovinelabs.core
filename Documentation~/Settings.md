@@ -1,208 +1,139 @@
-﻿# Settings
-## Summary
-The BovineLabs Core Settings system provides a comprehensive framework for creating, managing, and using configuration data in your Unity projects with DOTS support. This system leverages Unity's ScriptableObject architecture and optionally bridges to DOTS Entity Component System, allowing you to define configuration in the familiar Unity Editor environment while supporting conversion to ECS data.
+# Settings
 
-Key features include:
+## Summary
+
+The Settings system provides a framework for managing configuration data in Unity projects with DOTS support. Create settings as ScriptableObjects with automatic ECS integration.
+
+**Key Features:**
 - ScriptableObject-based settings with organized editor interface
 - Automatic creation and management of settings assets
-- Customizable editor window for organizing and editing settings
-- World targeting to control which ECS worlds your settings are available in
-- When combined with [SubScenes](SubScenes.md), settings can be easily managed across different world types
+- Global singleton settings that initialize automatically and are included in builds
+- World targeting to control which ECS worlds receive settings
+- Integrated with SubScenes for easy world management
 
-## System Architecture
+## Core Components
 
-### Core Interfaces and Classes
-
-| Interface/Class                | Purpose                                                                                       |
-|--------------------------------|-----------------------------------------------------------------------------------------------|
-| `ISettings`                    | Base interface that all settings implementations must inherit from                            |
-| `SettingsBase`                 | Abstract base class for settings that inherits from ScriptableObject and implements ISettings |
-| `EditorSettings`               | Core settings that control paths and default behaviors for the settings system                |
-
-### Authoring Components
-
-| Component                   | Purpose                                                                            |
-|-----------------------------|------------------------------------------------------------------------------------|
-| `SettingsAuthoring`         | MonoBehaviour for configuring which settings should be baked into a specific world |
-
-### Utilities
-
-| Utility                      | Purpose                                                                           |
-|------------------------------|-----------------------------------------------------------------------------------|
-| `AuthoringSettingsUtility`   | Utility for retrieving settings at authoring time                                 |
-| `EditorSettingsUtility`      | Editor utility for creating and retrieving settings                               |
-
-### Attributes
-
-| Attribute                     | Purpose                                                                               |
-|-------------------------------|---------------------------------------------------------------------------------------|
-| `AlwaysShowSettingsAttribute` | Forces settings to appear in the editor window even if they have no modifiable fields |
-| `ResourceSettingsAttribute`   | Places settings in a Resources folder for runtime loading                             |
-| `SettingsGroupAttribute`      | Categorizes settings into groups in the settings window                               |
-| `SettingsWorldAttribute`      | Specifies which worlds the settings should be baked into                              |
+- **ISettings**: Base interface for all settings
+- **SettingsBase**: Abstract base class for ECS-integrated settings
+- **SettingsSingleton**: Base class for global settings assets with automatic initialization
+- **SettingsAuthoring**: MonoBehaviour for configuring world-specific settings
+- **SettingsGroupAttribute**: Categorizes settings in the editor window
+- **SettingsWorldAttribute**: Specifies target worlds for settings
+- **SettingSubDirectoryAttribute**: Places generated assets into a subfolder under the settings root
 
 ## Creating Settings
 
-There are two primary approaches to creating settings:
-
-### 1. Simple Configuration Settings
-
-For settings that just need to be accessible in the editor or at runtime but don't need ECS integration, you can implement ISettings with any ScriptableObject:
+### Basic Settings
+For simple configuration without ECS integration:
 
 ```csharp
 [SettingsGroup("Game")]
 public class GameConfiguration : ScriptableObject, ISettings
 {
-    [SerializeField]
-    private float musicVolume = 0.75f;
+    [SerializeField] private float musicVolume = 0.75f;
+    [SerializeField] private bool enableTutorials = true;
     
-    [SerializeField]
-    private bool enableTutorials = true;
-    
-    public float MusicVolume => this.musicVolume;
-    public bool EnableTutorials => this.enableTutorials;
+    public float MusicVolume => musicVolume;
+    public bool EnableTutorials => enableTutorials;
 }
 ```
 
-This configuration will appear in the settings window and be automatically created, but won't be baked into any ECS worlds.
-
-### 2. ECS-Integrated Settings
-
-For settings that need to be baked into ECS worlds, inherit from SettingsBase (which already implements ISettings) and implement the Bake method:
+### ECS-Integrated Settings
+For settings that need to be baked into ECS worlds, inherit from SettingsBase:
 
 ```csharp
 [SettingsGroup("Game")]
-[SettingsWorld("Client", "Server")]  // Optional: specify target worlds
+[SettingsWorld("Client", "Server")]
 public class GameplaySettings : SettingsBase
 {
-    [SerializeField]
-    private float playerMoveSpeed = 5.0f;
+    [SerializeField] private float playerMoveSpeed = 5.0f;
+    [SerializeField] private int maxHealth = 100;
     
-    [SerializeField]
-    private int maxHealth = 100;
-    
-    public float PlayerMoveSpeed => this.playerMoveSpeed;
-    public int MaxHealth => this.maxHealth;
-    
-    // Implement custom baking logic to convert settings to ECS components
     public override void Bake(Baker<SettingsAuthoring> baker)
     {
         var entity = baker.GetEntity(TransformUsageFlags.None);
-        
-        // Add components with your settings data
         baker.AddComponent(entity, new GameplayData 
         { 
-            MoveSpeed = this.playerMoveSpeed,
-            Health = this.maxHealth,
+            MoveSpeed = playerMoveSpeed,
+            Health = maxHealth,
         });
     }
 }
 ```
 
-## Settings Setup
-
-Once you've defined your settings classes, they will be automatically created and managed:
+## Setup
 
 1. Open the Settings Window via `BovineLabs → Settings`
-2. Any settings that haven't been created will automatically be created
-   1. By default settings will be placed in the `Assets/Settings/Settings` folder
-   2. This can be configured via the Editor settings in the Settings Window
-3. Your settings will appear organized by the groups you defined
-4. Configure the values for your settings in the inspector panel
+2. Settings are automatically created in `Assets/Settings/Settings` folder
+3. Configure values in the inspector panel
 
-### Including Settings in Your ECS Worlds
+### Asset Organization
 
-If you want your settings to be available in ECS worlds:
+Apply `[SettingSubDirectory("UI")]` (or any folder name) to a settings type to place its asset inside `Assets/Settings/Settings/UI`. You can also override the root directory through `BovineLabs → Settings → Core → Editor Settings` in the Paths section, which `EditorSettingsUtility` uses whenever it creates or locates assets.
 
-1. Create a subscene that will be loaded in your target world(s)
-2. Add a GameObject and attach the `SettingsAuthoring` component
-3. Assign the settings you want associated with this subscene
+### ECS World Integration
 
-For example, in a client-server setup:
-- Client-only settings should be in a scene loaded only by the client
-- Server-only settings should be in a scene loaded only by the server
-- Shared settings should be in a scene loaded by both
+1. Create a subscene for your target world(s)
+2. Add a GameObject with `SettingsAuthoring` component
+3. Assign the settings you want in this world
 
-### Automating the Assignment Process
+### Automatic Assignment
 
-Settings can be automatically placed in specific SettingsAuthoring prefabs based on the `SettingsWorldAttribute`. To set this up:
+`SettingsBase` assets are automatically injected into the default or world-specific `SettingsAuthoring` prefabs defined in `Core → Editor Settings` whenever the settings window touches them. If assignments fall out of sync (for example after renaming worlds or manually editing the prefabs) you can rebuild them manually:
 
-1. Create a GameObject with a `SettingsAuthoring` component and convert it to a prefab
+1. Create prefabs with `SettingsAuthoring` components
 2. Navigate to `BovineLabs → Settings → Core → Editor Settings`
-3. Assign your prefab to the `Default Settings Authoring` field
-   - This is the fallback where all settings without a specific world or with worlds that don't match any specific authoring will be placed
-4. Add custom world-specific authorings using the `Settings Authoring` array
-   - Fill in the World field (e.g., "client", "server") and assign a SettingsAuthoring prefab
-   - All settings with matching `SettingsWorldAttribute` values will be assigned to these prefabs
-5. Click the "Update Settings" button to automatically sort all your settings into the appropriate `SettingsAuthoring` prefabs
-   - You can use this button any time you add new settings or change your world targeting
-6. Once configured, any new settings will automatically be assigned to the correct SettingsAuthoring prefabs
+3. Assign prefabs to `Default Settings Authoring` and `Settings Authoring` array
+4. Click "Update Settings" to automatically sort settings by world targeting
 
 ## Using Settings
 
 ### Accessing Settings
 
-There are two primary ways to access settings, depending on when and where you need them:
+**In Editor Tools:**
+```csharp
+var gameConfig = EditorSettingsUtility.GetSettings<GameConfiguration>();
+```
 
-1. **In Editor Tools**:  
-   Use `EditorSettingsUtility.GetSettings<T>()` for editor scripts and tools. This ensures settings assets exist, creating them if needed.
+**During Baking:**
+```csharp
+var gameSettings = AuthoringSettingsUtility.GetSettings<GameplaySettings>();
+```
 
-   ```csharp
-   var gameConfig = EditorSettingsUtility.GetSettings<GameConfiguration>();
-   ```
+**In ECS Systems:**
+```csharp
+var settings = SystemAPI.GetSingleton<GameplayData>();
+```
 
-2. **During Authoring/Baking**:  
-   Use `AuthoringSettingsUtility.GetSettings<T>()` during baking. This doesn't create settings if missing but will throw appropriate errors.
+**Global Singletons:**
+```csharp
+var inputActions = ControlSettings.I.Asset;
+```
 
-   ```csharp
-   var gameSettings = AuthoringSettingsUtility.GetSettings<GameplaySettings>();
-   ```
+## SettingsSingleton
 
-3. **In ECS Systems**:  
-   Access baked components and buffers using standard ECS queries:
+Use `SettingsSingleton<T>` for global data that needs to exist before worlds are created (InputAction assets, UI configuration, lookup tables, etc.). These assets still implement `ISettings`, so they appear in the Settings window, follow `[SettingsGroup]`, and are created in the same directory as other settings.
 
-   ```csharp
-   var settings = SystemAPI.GetSingleton<GameplayData>();
-   ```
-
-## Advanced Features
-
-### Resource Settings
-
-For settings that need to be accessible through Unity's Resources system:
+### Creating a Singleton
 
 ```csharp
-[ResourceSettings("MyGame")]
-public class ResourceGameSettings : ScriptableObject, ISettings
+public class ControlSettings : SettingsSingleton<ControlSettings>
 {
-    // Implementation
+    [SerializeField] private InputActionAsset asset;
+    [SerializeField] private ControlSchema[] schemas = Array.Empty<ControlSchema>();
+
+    public InputActionAsset Asset => this.asset;
+    public IReadOnlyList<ControlSchema> Schemas => this.schemas;
 }
 ```
 
-This will place the settings asset under a Resources folder for access via `Resources.Load<ResourceGameSettings>("MyGame/ResourceGameSettings")`.
+Create or open the asset from the Settings window and configure it like any other ScriptableObject. Access it anywhere with `ControlSettings.I`.
 
-### Custom Settings Panels
+### Lifetime and Initialization
 
-For advanced settings with custom UI:
+- `SettingsSingleton` uses `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]` and `[InitializeOnLoadMethod]` to call `Initialize` for every asset before gameplay code executes, so `ControlSettings.I` is valid immediately in both the editor and players.
+- Only one asset per type should exist; the settings window enforces this when it creates the asset.
 
-1. Create a class inheriting from `SettingsBasePanel<T>` where T is your settings type
-2. Implement custom UI drawing logic
-3. The custom panel will automatically be used in the Settings window
+### Build Inclusion
 
-### Empty Settings Handling
-
-By default, settings with no visible inspector fields are hidden in the settings window.
-For settings that need to appear in the window despite having hidden fields (for example, when you have custom editor functionality), use the `AlwaysShowSettings` attribute:
-
-```csharp
-[AlwaysShowSettings]
-public class SpecialSettings : ScriptableObject, ISettings
-{
-    [HideInInspector]
-    [SerializeField]
-    private int value;
-    
-    // This will still show in the settings window despite having no visible fields
-    // Useful for settings with custom editors or when hiding serialized fields
-}
-```
+During `BuildPlayer`, `CoreBuildSetup` temporarily adds every `SettingsSingleton` asset to `PlayerSettings.preloadedAssets`, guaranteeing the ScriptableObjects are included in the player build without having to reference them from scenes or Resources. After the build finishes, the processor removes those temporary entries so project settings stay clean.

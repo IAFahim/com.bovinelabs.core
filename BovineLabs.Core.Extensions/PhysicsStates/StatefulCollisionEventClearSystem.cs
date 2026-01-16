@@ -2,7 +2,7 @@
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
-#if !BL_DISABLE_PHYSICS_STATES
+#if !BL_DISABLE_PHYSICS_STATES && UNITY_PHYSICS
 namespace BovineLabs.Core.PhysicsStates
 {
     using Unity.Burst;
@@ -14,6 +14,7 @@ namespace BovineLabs.Core.PhysicsStates
     [UpdateBefore(typeof(StatefulCollisionEventSystem))]
     public partial struct StatefulCollisionEventClearSystem : ISystem
     {
+        /// <inheritdoc/>
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {

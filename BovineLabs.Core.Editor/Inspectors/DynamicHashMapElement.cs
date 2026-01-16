@@ -8,6 +8,7 @@ namespace BovineLabs.Core.Editor.Inspectors
     using System.Collections.Generic;
     using BovineLabs.Core.Editor.SearchWindow;
     using BovineLabs.Core.Iterators;
+    using Unity.Entities;
     using UnityEditor.UIElements;
     using UnityEngine.UIElements;
 
@@ -16,7 +17,7 @@ namespace BovineLabs.Core.Editor.Inspectors
         where TKey : unmanaged, IEquatable<TKey>
         where TValue : unmanaged
     {
-        public DynamicHashMapElement(object inspector, List<SearchView.Item>? items = default, TValue defaultValue = default)
+        public DynamicHashMapElement(object inspector, List<SearchView.Item>? items = null, TValue defaultValue = default)
             : base(inspector, items, defaultValue)
         {
         }
@@ -34,7 +35,7 @@ namespace BovineLabs.Core.Editor.Inspectors
         private readonly ToolbarToggle listElementToggle;
         private readonly ToolbarToggle searchToggle;
 
-        public DynamicHashMapElement(object inspector, List<SearchView.Item>? items = default, TValue defaultValue = default)
+        public DynamicHashMapElement(object inspector, List<SearchView.Item>? items = null, TValue defaultValue = default)
         {
             var hasItems = items is { Count: > 0 };
             this.listElementToggle = new ToolbarToggle();
@@ -66,6 +67,29 @@ namespace BovineLabs.Core.Editor.Inspectors
             }
 
             this.schedule.Execute(this.Update).Every(250);
+        }
+
+        public Action<IEntityContext, TKey, TValue> SearchSetValue
+        {
+            get
+            {
+                if (this.searchElement == null)
+                {
+                    return (_, _, _) =>
+                    {
+                    };
+                }
+
+                return this.searchElement.SetValue;
+            }
+
+            set
+            {
+                if (this.searchElement != null)
+                {
+                    this.searchElement.SetValue = value;
+                }
+            }
         }
 
         private void ListValueChanged(ChangeEvent<bool> evt)
@@ -106,7 +130,6 @@ namespace BovineLabs.Core.Editor.Inspectors
                 return;
             }
 
-            // TODO conditional on visible
             this.listElement.Update();
             this.searchElement?.Update();
         }

@@ -9,9 +9,9 @@ namespace BovineLabs.Core.Editor.Inspectors
     using BovineLabs.Core.Editor.SearchWindow;
     using BovineLabs.Core.Iterators;
     using Unity.Collections.LowLevel.Unsafe;
+    using Unity.Entities;
     using Unity.Entities.UI;
     using Unity.Properties;
-    using UnityEngine;
     using SearchElement = BovineLabs.Core.Editor.UI.SearchElement;
 
     public class DynamicHashMapSearchElement<T, TBuffer, TKey, TValue> : EntityInspector<T>
@@ -28,7 +28,8 @@ namespace BovineLabs.Core.Editor.Inspectors
             : base(inspector)
         {
             this.defaultValue = defaultValue;
-            var popup = new SearchElement(items, "Stat");
+            this.SetValue = this.SetValueDirect; // Default Value
+            var popup = new SearchElement(items, string.Empty);
 
             this.content = new PropertyElement();
             this.content.AddContext(this.Context.Context);
@@ -55,9 +56,11 @@ namespace BovineLabs.Core.Editor.Inspectors
             }
         }
 
-        private DynamicHashMap<TKey, TValue> GetMap()
+        public Action<IEntityContext, TKey, TValue> SetValue { get; set; }
+
+        private DynamicHashMap<TKey, TValue> GetMap(bool isReadOnly = true)
         {
-            return this.Context.EntityManager.GetBuffer<TBuffer>(this.Context.Entity, true).AsHashMap<TBuffer, TKey, TValue>();
+            return this.Context.EntityManager.GetBuffer<TBuffer>(this.Context.Entity, isReadOnly).AsHashMap<TBuffer, TKey, TValue>();
         }
 
         public unsafe void Update()
@@ -72,14 +75,14 @@ namespace BovineLabs.Core.Editor.Inspectors
                 return;
             }
 
-            var oldValue = this.content.GetTarget<TValue>();
+            var oldValue = this.content.GetTarget<ValueStruct>();
 
             var map = this.GetMap();
             var value = this.TryGetValue(map, this.current.Value);
 
-            if (UnsafeUtility.MemCmp(&oldValue, &value, UnsafeUtility.SizeOf<TValue>()) != 0)
+            if (UnsafeUtility.MemCmp(&oldValue.Value, &value, UnsafeUtility.SizeOf<TValue>()) != 0)
             {
-                this.content.SetTarget(value);
+                this.content.SetTarget(new ValueStruct { Value = value });
             }
         }
 
@@ -95,9 +98,14 @@ namespace BovineLabs.Core.Editor.Inspectors
                 return;
             }
 
-            var value = element.GetTarget<TValue>();
-            var map = this.GetMap();
-            map[this.current.Value] = value;
+            var value = element.GetTarget<ValueStruct>();
+            this.SetValue(this.Context, this.current!.Value, value.Value);
+        }
+
+        private void SetValueDirect(IEntityContext context, TKey key, TValue value)
+        {
+            var map = this.GetMap(false);
+            map[key] = value;
         }
 
         private void UpdateValue(object data)
@@ -117,7 +125,7 @@ namespace BovineLabs.Core.Editor.Inspectors
 
             this.current = key;
             var value = this.TryGetValue(map, key);
-            this.content.SetTarget(value);
+            this.content.SetTarget(new ValueStruct { Value = value });
         }
 
         private TValue TryGetValue(DynamicHashMap<TKey, TValue> map, TKey key)
@@ -128,6 +136,11 @@ namespace BovineLabs.Core.Editor.Inspectors
             }
 
             return value;
+        }
+
+        public struct ValueStruct
+        {
+            public TValue Value;
         }
     }
 }

@@ -20,6 +20,7 @@ namespace BovineLabs.Core.Editor.ConfigVars
         /// <inheritdoc />
         protected override string TitleText => "ConfigVars";
 
+        /// <inheritdoc/>
         protected override bool HideToggleShowEmpty => true;
 
         [MenuItem(EditorMenus.RootMenu + "ConfigVars", priority = -31)]
@@ -31,7 +32,7 @@ namespace BovineLabs.Core.Editor.ConfigVars
         /// <inheritdoc />
         protected override void GetPanels(List<ISettingsPanel> settingPanels)
         {
-            ConfigVarManager.Init();
+            ConfigVarManager.Initialize();
 
             foreach (var p in this.panels)
             {
@@ -78,15 +79,11 @@ namespace BovineLabs.Core.Editor.ConfigVars
         {
             if (EditorUtility.DisplayDialog("Confirm Reset To Default", "Reset all config vars to default values?", "Reset", "Cancel"))
             {
-                foreach (var panel in this.panels)
+                foreach (var c in ConfigVarManager.All)
                 {
-                    foreach (var configVar in panel.Value.ConfigVars)
-                    {
-                        EditorPrefs.DeleteKey(configVar.ConfigVar.Name);
-                    }
+                    EditorPrefs.DeleteKey(c.Key.Name);
+                    c.Value.StringValue = c.Key.DefaultValue;
                 }
-
-                // TODO REFRESG
             }
         }
     }

@@ -2,6 +2,8 @@
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
+#pragma warning disable SA1402
+
 namespace BovineLabs.Core.Editor.Inspectors
 {
     using BovineLabs.Core.Editor.Internal;
@@ -16,23 +18,13 @@ namespace BovineLabs.Core.Editor.Inspectors
     internal abstract class UnityObjectRefInspector<T> : PropertyInspector<UnityObjectRef<T>>
         where T : Object
     {
-        private IntegerField? idField;
         private ObjectField? objectField;
-        private Foldout? field;
 
+        /// <inheritdoc/>
         public override VisualElement Build()
         {
-            this.field = new Foldout { value = false };
-
-            this.idField = new IntegerField("Instance Id");
-            this.idField.SetEnabled(false);
-            InspectorUtility.AddRuntimeBar(this.idField);
-
             this.objectField = new ObjectField { enabledSelf = !this.IsReadOnly };
             InspectorUtility.AddRuntimeBar(this.objectField);
-
-            this.field.Add(this.idField);
-            this.field.Add(this.objectField);
 
             this.Update();
 
@@ -41,16 +33,16 @@ namespace BovineLabs.Core.Editor.Inspectors
                 this.Target = (T)evt.newValue;
             });
 
-            return this.field;
+            return this.objectField;
         }
 
+        /// <inheritdoc/>
         public override void Update()
         {
             var target = this.Target;
 
-            this.idField!.value = target.Id.instanceId;
             this.objectField!.value = target.Value;
-            this.field!.text = target.Value == null ? this.DisplayName : $"{this.DisplayName} : {target.Value.name}";
+            this.objectField!.label = target.Value == null ? this.DisplayName : $"{this.DisplayName} : {target.Value.name}";
         }
     }
 
@@ -79,7 +71,11 @@ namespace BovineLabs.Core.Editor.Inspectors
     {
     }
 
-#if !BL_DISABLE_INPUT
+    [UsedImplicitly]
+    internal class AudioClipUnityObjectRefInspector : UnityObjectRefInspector<AudioClip>
+    {
+    }
+
     [UsedImplicitly]
     internal class InputActionAssetUnityObjectRefInspector : UnityObjectRefInspector<UnityEngine.InputSystem.InputActionAsset>
     {
@@ -87,6 +83,12 @@ namespace BovineLabs.Core.Editor.Inspectors
 
     [UsedImplicitly]
     internal class InputActionReferenceUnityObjectRefInspector : UnityObjectRefInspector<UnityEngine.InputSystem.InputActionReference>
+    {
+    }
+
+#if UNITY_SPLINES
+    [UsedImplicitly]
+    internal class SplineContainerUnityObjectRefInspector : UnityObjectRefInspector<UnityEngine.Splines.SplineContainer>
     {
     }
 #endif

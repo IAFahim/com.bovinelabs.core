@@ -10,9 +10,15 @@ namespace BovineLabs.Core.LifeCycle
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.Entities;
 
+    /// <summary>
+    /// Propagates destruction through LinkedEntityGroup hierarchies. When an entity with DestroyEntity enabled has a LinkedEntityGroup,
+    /// this system recursively marks all child entities for destruction.
+    /// </summary>
+    [WorldSystemFilter(Worlds.SimulationMenu)]
     [UpdateInGroup(typeof(DestroySystemGroup), OrderFirst = true)]
     public partial struct DestroyOnDestroySystem : ISystem
     {
+        /// <inheritdoc/>
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
@@ -24,6 +30,13 @@ namespace BovineLabs.Core.LifeCycle
             }.ScheduleParallel();
         }
 
+        /// <summary>
+        /// Recursively propagates destruction through a LinkedEntityGroup hierarchy.
+        /// </summary>
+        /// <param name="linkedEntityGroup">The LinkedEntityGroup buffer to process.</param>
+        /// <param name="destroyEntities">Component lookup for DestroyEntity components.</param>
+        /// <param name="linkedEntityGroups">Buffer lookup for nested LinkedEntityGroup components.</param>
+        /// <param name="entityStorageInfoLookup">Entity storage info lookup for existence checks.</param>
         public static void DestroyIterative(
             DynamicBuffer<LinkedEntityGroup> linkedEntityGroup, ComponentLookup<DestroyEntity> destroyEntities,
             BufferLookup<LinkedEntityGroup> linkedEntityGroups, EntityStorageInfoLookup entityStorageInfoLookup)

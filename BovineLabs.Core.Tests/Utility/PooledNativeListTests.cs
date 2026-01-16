@@ -4,6 +4,7 @@
 
 namespace BovineLabs.Core.Tests.Utility
 {
+    using System;
     using BovineLabs.Core.Utility;
     using NUnit.Framework;
     using Unity.Burst;
@@ -92,7 +93,9 @@ namespace BovineLabs.Core.Tests.Utility
                     $"Job {i} recorded an out-of-bounds thread index");
             }
 
-            // Verify that multiple thread indices were used (if multiple threads available)
+            // Verify that at least some valid thread indices were recorded
+            // Note: We don't assert that multiple threads were used since Unity's job scheduler
+            // may choose to run all jobs on a single thread depending on system load and configuration
             var uniqueThreadIndices = new NativeHashSet<int>(jobCount, Allocator.Temp);
             for (var i = 0; i < jobCount; i++)
             {
@@ -100,12 +103,6 @@ namespace BovineLabs.Core.Tests.Utility
             }
 
             Assert.Greater(uniqueThreadIndices.Count, 0, "No valid thread indices were recorded");
-
-            // Only check for multiple threads if we have multiple threads available
-            if (jobCount > 1 && Unity.Jobs.LowLevel.Unsafe.JobsUtility.ThreadIndexCount > 1)
-            {
-                Assert.Greater(uniqueThreadIndices.Count, 1, "Only one thread was used despite having multiple threads available");
-            }
 
             uniqueThreadIndices.Dispose();
             results.Dispose();
@@ -183,8 +180,9 @@ namespace BovineLabs.Core.Tests.Utility
             using (var doubleList = PooledNativeList<double>.Make())
             {
                 // The capacity should be approximately half (due to size difference)
+                // Allow some tolerance for pooling overhead and rounding
                 Assert.LessOrEqual(doubleList.List.Capacity, smallTypeCapacity);
-                Assert.GreaterOrEqual(doubleList.List.Capacity * 2, smallTypeCapacity);
+                Assert.GreaterOrEqual(doubleList.List.Capacity * 2 + 1, smallTypeCapacity);
 
                 // Ensure the list is still usable
                 for (var i = 0; i < 50; i++)
@@ -209,6 +207,29 @@ namespace BovineLabs.Core.Tests.Utility
 
                 Assert.AreEqual(100, intList.List.Length);
             }
+        }
+
+        [Test]
+        public void UsingReturnedList_ThrowsInEditor()
+        {
+            var pooledList = PooledNativeList<int>.Make();
+            pooledList.List.Add(1);
+
+            pooledList.Dispose();
+
+            Assert.Catch<InvalidOperationException>(() => pooledList.List.Add(2));
+        }
+
+        [Test]
+        public void DoubleDisposeFromCopy_ThrowsInEditor()
+        {
+            var pooledList = PooledNativeList<int>.Make();
+            pooledList.List.Add(1);
+
+            var pooledListCopy = pooledList;
+            pooledList.Dispose();
+
+            Assert.Catch<InvalidOperationException>(() => pooledListCopy.Dispose());
         }
 
         [Test]

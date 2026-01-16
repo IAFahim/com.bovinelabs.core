@@ -11,11 +11,10 @@ namespace BovineLabs.Core
     using UnityEngine;
 #endif
 
-    public static class WorldSafeShutdown
+    internal static class WorldSafeShutdown
     {
 #if UNITY_EDITOR
-        [InitializeOnLoadMethod]
-        private static void Init()
+        internal static void Initialize()
         {
             EditorApplication.playModeStateChanged += change =>
             {
@@ -27,7 +26,7 @@ namespace BovineLabs.Core
         }
 #else
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Init()
+        private static void Initialize()
         {
             Application.quitting += OnQuit;
         }
@@ -43,6 +42,8 @@ namespace BovineLabs.Core
                 {
                     continue;
                 }
+
+                world.EntityManager.CompleteAllTrackedJobs();
 
                 TryDisableUpdateSystemGroup<InitializationSystemGroup>(world);
                 TryDisableUpdateSystemGroup<SimulationSystemGroup>(world);

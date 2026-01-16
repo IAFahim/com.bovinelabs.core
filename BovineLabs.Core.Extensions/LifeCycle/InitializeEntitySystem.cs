@@ -9,6 +9,11 @@ namespace BovineLabs.Core.LifeCycle
     using Unity.Burst.Intrinsics;
     using Unity.Entities;
 
+    /// <summary>
+    /// Core system that disables initialization components after initialization is complete.
+    /// Runs last in InitializeSystemGroup to clean up InitializeEntity and InitializeSubSceneEntity components.
+    /// </summary>
+    [WorldSystemFilter(Worlds.SimulationMenu)]
     [UpdateInGroup(typeof(InitializeSystemGroup), OrderLast = true)]
     public partial struct InitializeEntitySystem : ISystem
     {

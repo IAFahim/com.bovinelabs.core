@@ -1,15 +1,232 @@
 # Changelog
 
-## [1.4.3] - 2025-06-01
+## [1.5.2] - 2026-01-16
+
+### Fixed
+* Compiling < 6.3 - this will be the last support version
+* No longer requires unity input system
+
+## [1.5.1] - 2025-12-23
+
+### Added
+* Menu toggle added to WelcomeWindow
+* Welcome window config
+* Added 4 mod BurstTrampoline
+* More safety on PooledNativeList
+* BovineLabsBootstrap experimental hostworld support for netcode (if enabled)
+
+### Changed
+* Reduced InitializeOnLoad count to 1 
+* Improved configvar window styling
+
+### Fixed
+* BurstTrampoline on certain IL2CPP configs
+* CreateEditorWorld on leaving play mode
+* TryGetValue for DynamicUntypedHashMap if offsetting was > 256
+* DynamicUntypedHashMap resizeData incorrectly potentially adding too much capacity.
+
+### Removed
+* WorldAllocator
+* EditorWorldSafeShutdown
+
+## [1.5.0] - 2025-12-06
+
+### Added
+* New Manager Window that'll show once, now handles Extensions and can install other BovineLabs packages
+* 6.4a4+ support
+* 2.6.3 collections support
+* Vector4 and Rect configvar support.
+* IFacet, IAspect replacement
+* Diagnostic warnings for Input and DynamicMaps
+* Readonly support for CodeGenHelpers
+* BurstTrampoline for easy breaking out of burst into managed code
+* SyncEnableStateUtil
+* PhysicsLayerUtil
+* CameraMain to editor world for tooling
+* AudioClipUnityObjectRefInspector
+* Schedule to IJobHashMapDefer
+* MainToolbarPresetAttribute and an IL PostProcessor to allow toolbar elements to be visible by default
+
+### Changed
+* Exposed mingrowth on UnsafeMultiHashMap
+* Changed how Input works to work around Unity bug loses references to the Assets, run Update Settings from the setting BovineLabs->Settings->Core->Editor
+* InputCommon no longer has Physics dependency
+* Added overload to ClearRewind for enforced safety.
+* PhysicsUpdate is now enablable as an extension
+
+### Fixed
+* GlobalRandom now initializes earlier to ensure it's ready before OnCreate when using AutomaticBootstrap
+
+### Removed
+* EntityCache
+* FeatureWindow, replaced by Manager
+
+## [1.4.7] - 2025-10-30
+
+### Added
+* MemoryLabelAllocator that wraps unity 6.3 MemoryLabel (with backwards compatability support for <6.3)
+* CurveRemapUtility
+* CameraSystemGroup
+* ToSpline() on BlobSpline
+* Evaluate to BlobSpline
+
+### Changed
+* Trying to use a list from PooledNativeList after it has returned will now throw exceptions
+
+### Fixed
+* ConfigVar reset
+* BitFieldAttributeEditor now supports multiple fields with same name
+* Pause fix for netcode 1.9
+* NativeWorkQueue now supports custom allocators
+
+### Removed
+* ResourceSettingsAttribute - use SettingsSingleton which will auto include in builds
+
+## [1.4.6] - 2025-10-03
+
+### Breaking
+* FeatureWindow now uses new EditorSettings scripting defines which will make existing projects incorrectly appear like features are disabled until reenabled again
+
+### Added
+* Can now load scenes as subscenes
+* EnableableComponentAsset and a new shared ComponentAssetBase
+* FrameCount to BlLogger
+* Color support for config vars
+* Right click context menu for config vars to reset or copy values
+* New platform shared scripting defines in EditorSettings
+* IJobForThread to schedule work across a fixed number of threads
+* Custom inspector for EntitySceneReference
+* SettingsSingleton<T> to reduce boilerplate
+* ObjectInspectorProxy and PropertyInspector to inspector anything using Unitys prperty package
+* ViewModelToolbar to inspect all UI Toolkit view models
+
+### Changed
+* Reload Toolbar Button no longer requires extensions (as you can hide it with new Unity Toolbar)
+* Reworked the toolbar buttons a little
+* TimeProfiler is now burstable
+* Reworked the alive detection in the favourite/selection windows to fix odd Unity behaviour
+* SubSceneLoadingSystem now pauses by default to fix fast world creation
+* CameraMain now auto generates if no authoring setup.
+
+### Fixed
+* Startup Scene was incorrectly using Async causing it to break if it was a heavier scene
+* FromToRotation
+* Feature and Selection window selection when scrolled down
+* Setting values with DynamicHashMap custom inspector
+* Errors when BlobHashMap when capacity is 0
+* Unloading runtime live scenes
+* LoadPrefabAsEntity when no LEG
+
+### Removed
+* Support for Editor Toolbar below Unity 6.3
+* ToEuler in mathex as math package has this method now
+* KSettings, now uses SettingsSingleton<T>
+
+## [1.4.5.1] - 2025-08-17
+
+### Fixed
+* SettingSubDirectoryAttribute not correctly creating directory
+
+## [1.4.5] - 2025-08-17
+
+### Added
+* Selection history window
+* Favourites window
+* SubSettingsAttribute
+* SettingsSingleton which auto includes settings in build
+* Unity 6.3 support
+* cid support for ObjectDefinitionSearchProvider
+* BlobAssetStore to ECSTestsFixture
+* ReflectionTestHelper
+* FromToRotation
+* BitWise internals
+
+### Changed
+* Updated ECSTestFixture for Entities latest changes
+* K no longer goes in Resources, automatically added to builds
+* Exposed SearchProviderType on ObjectDefinition for easy attribute usage
+* Moved InitializeSystemGroup before DestroySystemGroup to allow for reacting to dead entities on same frame
+* Added SceneInitializeSystem where InitializeSystemGroup used to exist that initializes new subscenes and ghosts
+
+### Fixed
+* Id bug in ObjectManagementProcessor which was causing ids to duplicate
+
+### Removed
+* ISpline from BlobSpline so you can no longer accidentaly use block breaking extension methods
+
+### Documentation
+* EntityBlob documentation added covering memory-efficient storage of multiple BlobAssetReferences
+* ObjectDefinition search integration documentation added covering SearchContext attribute usage with filters
+* LifeCycle documentation explaining destroy features
+
+## [1.4.4] - 2025-07-12
+
+### Added
+* Scene toolbar button for opening and closing scenes in editor, there is a bunch of config in configvars
+* Better exception handling to source generators
+* 1.4.0-pre.3 support
+* BlobSpline if the Unity Spline package is found
+* Added an optional baker for SplineContainer, must be manually enabled with BL_BAKE_SPLINE
+* int indexer to BitArray
+* Source generator support for VariableMap - auto-generates Initialize() and AsMap() extension methods
+* Source generator support for PerfectHashMap - auto-generates AsMap() extension method (Initialize() requires manual implementation)
+* Added SetName to IEntityCommands
+
+### Changed
+* SubScenePrebakeSystem no longer forces settings to be generated
+* AddUnique renamed to Add for BlobBuilderMultiHashMap
+* InputSystemGroup now updates while paused
+* Increased label size of config var window
+* GlobalRandom now in Utility namespace
+
+### Removed
+* ListPool<T> - just use the built in one UnityEngine.Pool.ListPool<T>
+
+### Fixed
+* SingletonInitializeSystemGroup lifecycle requirement
+
+### Documentation
+* Major documentation restructuring
+* Input documentation updated for new assembly structure and significantly streamlined
+* ObjectManagement documentation updated for ObjectId changes and consolidated explanations
+* Jobs documentation rewritten with examples and best practices
+* EntityCommands documentation rewritten with usage patterns
+* Settings documentation streamlined with simplified component overview
+* Functions documentation improved with cleaner examples and reduced verbosity
+* SubScenes documentation enhanced with better setup instructions and runtime examples)
+* States documentation cleaned up with consolidated examples and removed incomplete sections
+* LifeCycle documentation streamlined with simplified architecture tables
+* K documentation improved with cleaner setup instructions and usage examples
+* README.md updated with clearer descriptions and current job types
+* GlobalRandom documentation improved
+* ChangeFilterTracking documentation updated
+* DynamicHashMap documentation enhanced with examples
+* SingletonCollection documentation improved
+* Collections documentation added covering all specialized collection types
+* Extensions documentation added covering all extension methods
+* Utility documentation added covering all utility classes and helpers
+* Debug documentation added covering debugging and assertion utilities
+* Iterators documentation added covering high-performance iterator utilities
+* PhysicsStates documentation added covering stateful collision and trigger event tracking
+* PhysicsUpdate documentation added covering high frame rate physics spatial data maintenance
+* Camera documentation added covering ECS camera integration with frustum culling
+* Pause documentation added covering world-level pause system with fine-grained control
+* Analyzers documentation added covering automatic Roslyn analyzer integration infrastructure
+
+## [1.4.3] - 2025-06-07
 
 ### Added
 * ComponentAsset and ComponentFieldAsset for more stable type and fields instead of directly storing StableTypeHash and Offsets
 * A Unity compatible and updated version of CodeGenHelpers https://github.com/dansiegel/CodeGenHelpers to use with source generators
-* Source Generator for generating IDynamic[HashMap|HashSet|IndexedMap|MultiHashMap|UntypedHashMap] Initialize and AsMap methods
+* Source Generator for generating IDynamic[HashMap|HashSet|MultiHashMap|UntypedHashMap] Initialize and AsMap methods
 * ProfilerTimer for quick easy scoped Timing
 * BLGlobalLogger
 * SubScenePostLoadCommandBufferSystem for allowing setup of PostLoadCommandBuffer from multiple places
 * Added BL_TOOLS_MENU if you want to move the BovineLabs menu to Tools/BovineLabs
+* SingletonAttribute which can be added to DynamicBuffers to auto merge multiple into a single singleton at runtime
+* Support for AutoRef to optionally generate a 'null' asset
+* DynamicVariableMap<TKey, TValue, T, TC> and DynamicVariableMap<TKey, TValue, T1, TC1, T2, TC2> that allow you to have dynamic multiple column indexing
+* MultiHashColumn and OrderedListColumn to be used in IDynamicVariableMap, you can implement your own type by implementing the IColumn interface
 
 ### Changed
 * Scope limited source generators
@@ -25,18 +242,26 @@
 * ObjectId is again just an int
 * ObjectDefinitions no longer use Mod keys
 * SubSceneSet ID is now a struct SubSceneSetId not an int
+* Moved AssetCreator config to AutoRef
+* Added better checks in AssetCreator
 
 ### Removed
 * AllTypeIndex from TypeManagerEx to speed up domain reloads
+* DynamicIndexedMap as it's replaced by DynamicVariableMap
 
-### documentation
+### Documentation
 * LifeCycle
+* DynamicHashMap updated to reflect source generation and new types
 
 ### Fixed
 * SearchView can now handle generic paths
+* SearchView issue with having to double click
+* SearchView error on hitting escape in nested menu
 * Timing issue with SubSceneLoadingManagedSystem and subscribing to SceneManager.sceneLoaded
 * ObjectManagementProcessor no longer triggers save unless it triggered dirtying the asset
 * SubSceneEditorToolbar can again unload SubScenes
+* CodeGenHelpers FullyQualifiedName not working with nested classes
+* CodeGenHelpers not working in global namespace
 
 ## [1.4.2] - 2025-04-26
 

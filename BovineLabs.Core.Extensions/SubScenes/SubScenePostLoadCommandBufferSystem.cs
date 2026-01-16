@@ -2,7 +2,7 @@
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
-#if !BL_DISABLE_SUBSCENE
+#if !BL_DISABLE_SUBSCENE && !UNITY_DISABLE_MANAGED_COMPONENTS
 namespace BovineLabs.Core.SubScenes
 {
     using System;
@@ -11,7 +11,6 @@ namespace BovineLabs.Core.SubScenes
     using BovineLabs.Core.Utility;
     using Unity.Collections;
     using Unity.Entities;
-    using UnityEngine;
     using Hash128 = Unity.Entities.Hash128;
 
     public interface ICreatePostLoadCommandBuffer
@@ -26,6 +25,7 @@ namespace BovineLabs.Core.SubScenes
         private readonly List<ICreatePostLoadCommandBuffer> creators = new();
         private EntityQuery query;
 
+        /// <inheritdoc/>
         protected override void OnCreate()
         {
             this.query = SystemAPI.QueryBuilder().WithAll<SceneReference>().WithNone<PostLoadCommandBuffer>().Build();
@@ -40,10 +40,9 @@ namespace BovineLabs.Core.SubScenes
             {
                 this.Enabled = false;
             }
-
-            List<Material> a = new List<Material>();
         }
 
+        /// <inheritdoc/>
         protected override void OnUpdate()
         {
             var sceneReferences = this.query.ToComponentDataArray<SceneReference>(this.WorldUpdateAllocator);

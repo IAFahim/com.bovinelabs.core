@@ -13,11 +13,17 @@ namespace BovineLabs.Core.Editor.ConfigVars
     using Unity.Burst;
     using Unity.Collections;
     using UnityEditor;
+    using UnityEditor.UIElements;
+    using UnityEngine;
     using UnityEngine.UIElements;
 
     /// <summary> A panel that draws a collection of config vars. </summary>
     public sealed class ConfigVarPanel : ISettingsPanel
     {
+        private const string FieldClassName = "config-var__field";
+        private const string HighlightClassName = "search";
+        private const string ReadOnlyClassName = "config-var__readonly";
+
         /// <summary> Initializes a new instance of the <see cref="ConfigVarPanel" /> class. </summary>
         /// <param name="displayName"> The display name of the panel. </param>
         public ConfigVarPanel(string displayName)
@@ -28,8 +34,10 @@ namespace BovineLabs.Core.Editor.ConfigVars
         /// <inheritdoc />
         public string DisplayName { get; }
 
+        /// <inheritdoc/>
         public string GroupName => this.DisplayName;
 
+        /// <inheritdoc/>
         public bool IsEmpty => false;
 
         /// <summary> Gets a list of all the config vars this panel draws. </summary>
@@ -48,17 +56,10 @@ namespace BovineLabs.Core.Editor.ConfigVars
                 var readOnly = attribute.IsReadOnly && EditorApplication.isPlaying;
                 var field = CreateVisualElement(attribute, fieldInfo);
 
-                // TODO move to uss
-                if (!allMatch && MatchesSearchContext(attribute.Name, searchContext))
-                {
-                    field.style.backgroundColor = ConfigVarStyle.Style.HighlightColor;
-                }
-
-                if (readOnly)
-                {
-                    // TODO
-                    // field.style.color = new StyleColor();
-                }
+                field.AddToClassList(FieldClassName);
+                var shouldHighlight = !allMatch && MatchesSearchContext(attribute.Name, searchContext);
+                field.EnableInClassList(HighlightClassName, shouldHighlight);
+                field.EnableInClassList(ReadOnlyClassName, readOnly);
 
                 this.Fields.Add((attribute, field));
                 rootElement.Add(field);
@@ -106,6 +107,9 @@ namespace BovineLabs.Core.Editor.ConfigVars
                 SharedStatic<int> sharedStatic => SetupField(new IntegerField(), configVar, sharedStatic),
                 SharedStatic<float> sharedStatic => SetupField(new FloatField(), configVar, sharedStatic),
                 SharedStatic<bool> sharedStatic => SetupField(new Toggle(), configVar, sharedStatic),
+                SharedStatic<Color> sharedStatic => SetupColorField(configVar, sharedStatic),
+                SharedStatic<Vector4> sharedStatic => SetupVector4Field(configVar, sharedStatic),
+                SharedStatic<Rect> sharedStatic => SetupRectField(configVar, sharedStatic),
                 SharedStatic<FixedString32Bytes> sharedStatic => SetupTextField(configVar, sharedStatic),
                 SharedStatic<FixedString64Bytes> sharedStatic => SetupTextField(configVar, sharedStatic),
                 SharedStatic<FixedString128Bytes> sharedStatic => SetupTextField(configVar, sharedStatic),
@@ -128,6 +132,25 @@ namespace BovineLabs.Core.Editor.ConfigVars
             return SetupField(field, configVar, new ConfigVarStringBinding<T>(field, configVar, sharedStatic));
         }
 
+        private static BaseField<Color> SetupColorField(ConfigVarAttribute configVar, SharedStatic<Color> sharedStatic)
+        {
+            var field = new ColorField();
+            return SetupField(field, configVar, new ConfigVarColorBinding(field, configVar, sharedStatic));
+        }
+
+        private static BaseField<Vector4> SetupVector4Field(ConfigVarAttribute configVar, SharedStatic<Vector4> sharedStatic)
+        {
+            var field = new Vector4Field();
+            return SetupField(field, configVar, new ConfigVarVector4Binding(field, configVar, sharedStatic));
+        }
+
+        private static BaseField<Rect> SetupRectField(ConfigVarAttribute configVar, SharedStatic<Rect> sharedStatic)
+        {
+            var field = new RectField();
+            return SetupField(field, configVar, new ConfigVarRectBinding(field, configVar, sharedStatic));
+        }
+
+
         private static BaseField<T> SetupField<T>(BaseField<T> field, ConfigVarAttribute configVar, IConfigVarBinding<T> binding)
         {
             field.binding = binding;
@@ -141,6 +164,7 @@ namespace BovineLabs.Core.Editor.ConfigVars
         {
             var isEnabled = !configVar.IsReadOnly || !isPlaying;
             field.SetEnabled(isEnabled);
+            field.EnableInClassList(ReadOnlyClassName, !isEnabled);
         }
 
         private void OnPlayModeStateChanged(PlayModeStateChange state)

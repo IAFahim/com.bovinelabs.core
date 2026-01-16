@@ -14,30 +14,54 @@ namespace CodeGenHelpers
 {
     public sealed class ClassBuilder : BuilderBase<ClassBuilder>
     {
-        private readonly List<string> _attributes = new List<string>();
-        private readonly List<string> _interfaces = new List<string>();
-        private readonly List<string> _classAttributes = new List<string>();
-        private readonly List<ConstructorBuilder> _constructors = new List<ConstructorBuilder>();
-        private readonly List<EventBuilder> _events = new List<EventBuilder>();
-        private readonly List<PropertyBuilder> _properties = new List<PropertyBuilder>();
-        private readonly List<MethodBuilder> _methods = new List<MethodBuilder>();
-        private readonly Queue<ClassBuilder> _nestedClass = new Queue<ClassBuilder>();
-        private readonly Queue<DelegateBuilder> _nestedDelegates = new Queue<DelegateBuilder>();
-        private readonly GenericCollection _generics = new GenericCollection();
+        private readonly List<string> _attributes = new();
+        private readonly List<string> _interfaces = new();
+        private readonly List<string> _classAttributes = new();
+        private readonly List<ConstructorBuilder> _constructors = new();
+        private readonly List<EventBuilder> _events = new();
+        private readonly List<PropertyBuilder> _properties = new();
+        private readonly List<MethodBuilder> _methods = new();
+        private readonly Queue<ClassBuilder> _nestedClass = new();
+        private readonly Queue<DelegateBuilder> _nestedDelegates = new();
+        private readonly GenericCollection _generics = new();
         private readonly bool _isPartial;
+        private readonly ClassBuilder? _parent;
         private DocumentationComment? _xmlDoc;
         private Func<PropertyBuilder, string>? _propertiesOrderBy = null;
 
-        internal ClassBuilder(string className, CodeBuilder codeBuilder, bool partial = true)
+        internal ClassBuilder(string className, CodeBuilder codeBuilder, bool partial = true, ClassBuilder? parent = null)
         {
             Name = className;
             Builder = codeBuilder;
             _isPartial = partial;
+            _parent = parent;
         }
 
         public string Name { get; }
 
-        public string FullyQualifiedName => $"{Builder.Namespace}.{Name}";
+        public string FullyQualifiedName
+        {
+            get
+            {
+                var parts = new List<string>();
+                var current = this;
+
+                // Walk up the parent chain to build the full name
+                while (current != null)
+                {
+                    parts.Insert(0, current.Name);
+                    current = current._parent;
+                }
+
+                // Prepend the namespace if we have one
+                if (Builder.Namespace is not null)
+                {
+                    parts.Insert(0, Builder.Namespace);
+                }
+
+                return string.Join(".", parts);
+            }
+        }
 
         public IReadOnlyList<ConstructorBuilder> Constructors => _constructors;
 
@@ -61,6 +85,8 @@ namespace CodeGenHelpers
 
         public bool IsSealed { get; private set; }
 
+        public bool IsReadOnly { get; private set; }
+
         public ClassBuilder WithSummary(string summary)
         {
             _xmlDoc = new SummaryDocumentationComment { Summary = summary };
@@ -82,6 +108,12 @@ namespace CodeGenHelpers
         public ClassBuilder Sealed()
         {
             IsSealed = true;
+            return this;
+        }
+
+        public ClassBuilder ReadOnly(bool isReadOnly = true)
+        {
+            IsReadOnly = isReadOnly;
             return this;
         }
 
@@ -277,11 +309,12 @@ namespace CodeGenHelpers
 
         public ClassBuilder AddNestedClass(ITypeSymbol typeSymbol) =>
             AddNestedClass(typeSymbol.Name, true, typeSymbol.DeclaredAccessibility)
-                .OfType(typeSymbol.TypeKind);
+                .OfType(typeSymbol.TypeKind)
+                .ReadOnly(typeSymbol.IsReadOnly);
 
         public ClassBuilder AddNestedClass(string name, bool partial, Accessibility? accessModifier = null)
         {
-            var builder = new ClassBuilder(name, Builder, partial);
+            var builder = new ClassBuilder(name, Builder, partial, this);
             if (accessModifier.HasValue)
                 builder.WithAccessModifier(accessModifier.Value);
 
@@ -346,6 +379,7 @@ namespace CodeGenHelpers
                 IsStatic ? "static" : null,
                 IsSealed ? "sealed" : null,
                 IsAbstract ? "abstract" : null,
+                IsReadOnly && Kind == TypeKind.Struct ? "readonly" : null,
                 _isPartial ? "partial" : null,
                 (Kind == TypeKind.Struct ? "struct" : Kind.ToString()).ToLowerInvariant(), // Unity breaks here with Structure
                 $"{Name}{_generics}",

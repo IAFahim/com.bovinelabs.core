@@ -4,12 +4,11 @@
 
 namespace BovineLabs.Core.Editor.AssemblyBuilder
 {
-    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using BovineLabs.Core.Editor.UI;
+    using BovineLabs.Core.Editor.Utility;
     using UnityEditor;
     using UnityEngine;
     using UnityEngine.UIElements;
@@ -20,26 +19,13 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
         private const string AssemblyInfoTemplate =
             "// <copyright file=\"AssemblyInfo.cs\" company=\"{0}\">\n// Copyright (c) {0}. All rights reserved.\n// </copyright>\n\nusing System.Runtime.CompilerServices;\n";
 
+        private const string DisableTypeRegistration = "using Unity.Entities;\n\n[assembly: DisableAutoTypeRegistration]\n";
+
         private const string DisableAutoCreationTemplate = "using Unity.Entities;\n\n[assembly: DisableAutoCreation]";
         private const string InternalAccessTemplate = "\n[assembly: InternalsVisibleTo(\"{0}\")]";
 
         private const string RootUIPath = "Packages/com.bovinelabs.core/Editor Default Resources/AssemblyBuilder/";
         private static readonly UITemplate AssemblyBuilderTemplate = new(RootUIPath + "AssemblyBuilder");
-        private static readonly Func<string> GetActiveFolderPath;
-        private static readonly Func<object> GetProjectBrowserIfExists;
-        private static readonly FieldInfo ViewMode;
-
-        static AssemblyBuilderWindow()
-        {
-            var projectWindowUtilType = typeof(ProjectWindowUtil);
-            var getActiveFolderPathMethod = projectWindowUtilType.GetMethod("GetActiveFolderPath", BindingFlags.Static | BindingFlags.NonPublic);
-            GetActiveFolderPath = (Func<string>)Delegate.CreateDelegate(typeof(Func<string>), getActiveFolderPathMethod!);
-
-            var getProjectBrowserIfExistsMethod = projectWindowUtilType.GetMethod("GetProjectBrowserIfExists", BindingFlags.Static | BindingFlags.NonPublic);
-            GetProjectBrowserIfExists = (Func<object>)Delegate.CreateDelegate(typeof(Func<object>), getProjectBrowserIfExistsMethod!);
-
-            ViewMode = getProjectBrowserIfExistsMethod!.ReturnType.GetField("m_ViewMode", BindingFlags.Instance | BindingFlags.NonPublic)!;
-        }
 
         [MenuItem(EditorMenus.RootMenuTools + "Assembly Builder", priority = 1007)]
         private static void ShowWindow()
@@ -62,32 +48,7 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
 
         private void Update()
         {
-            this.rootVisualElement.Q<TextField>("directory").value = GetDirectory();
-        }
-
-        private static string GetDirectory()
-        {
-            var isTwoColumnView = IsTwoColumnView();
-
-            if (!isTwoColumnView && Selection.objects.Length == 1)
-            {
-                var assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
-                return AssetDatabase.IsValidFolder(assetPath) ? assetPath + "/" : Path.GetDirectoryName(assetPath)!.Replace("\\", "/");
-            }
-
-            return GetActiveFolderPath();
-        }
-
-        private static bool IsTwoColumnView()
-        {
-            var browser = GetProjectBrowserIfExists();
-            if (browser == null)
-            {
-                return true;
-            }
-
-            var mode = ViewMode.GetValue(browser)!;
-            return !Convert.ChangeType(mode, Enum.GetUnderlyingType(mode.GetType())).Equals(0);
+            this.rootVisualElement.Q<TextField>("directory").value = ProjectView.Internal.GetDirectory();
         }
 
         private void OnEnable()
@@ -137,7 +98,7 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
 
         private void Create()
         {
-            var activeFolderPath = GetDirectory();
+            var activeFolderPath = ProjectView.Internal.GetDirectory();
 
             var assemblyToggles = this.rootVisualElement.Query<Toggle>(className: "assembly").Where(t => t.value).ToList();
 
@@ -158,6 +119,7 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
             var internalAccess = this.GetToggleValue("internalAccess");
             var disableAutoCreation = this.GetToggleValue("disableAutoCreation");
             var allowUnsafeCode = this.GetToggleValue("allowUnsafeCode");
+            var addAnchor = this.GetToggleValue("addAnchor");
 
             foreach (var toggle in assemblyToggles)
             {
@@ -195,7 +157,7 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
                 {
                     if (internalAccess)
                     {
-                        this.AddInternalAccess(nameField, folder, "Data");
+                        this.WriteAssemblyInfo(nameField, folder, false, "Data");
                     }
                 }
                 else
@@ -219,15 +181,15 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
                         {
                             if (label == "Main")
                             {
-                                this.AddInternalAccess(nameField, folder, "Data", "Main", "Authoring");
+                                this.WriteAssemblyInfo(nameField, folder, false, "Data", "Main", "Authoring");
                             }
                             else if (label == "Server")
                             {
-                                this.AddInternalAccess(nameField, folder, "Data", "Main", "Server", "Authoring");
+                                this.WriteAssemblyInfo(nameField, folder, false, "Data", "Main", "Server", "Authoring");
                             }
                             else if (label == "Authoring")
                             {
-                                this.AddInternalAccess(nameField, folder, "Data", "Main", "Authoring", "Debug");
+                                this.WriteAssemblyInfo(nameField, folder, true, "Data", "Main", "Authoring", "Debug");
                             }
                         }
                     }
@@ -235,7 +197,11 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
                     switch (label)
                     {
                         case "Main":
-                            AddAnchor(references);
+                            if (addAnchor)
+                            {
+                                AddAnchor(references);
+                            }
+
                             break;
 
                         case "Server":
@@ -243,7 +209,11 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
                             break;
 
                         case "Debug":
-                            AddAnchor(references);
+                            if (addAnchor)
+                            {
+                                AddAnchor(references);
+                            }
+
                             definition.defineConstraints.Add("UNITY_EDITOR || BL_DEBUG");
                             break;
 
@@ -319,7 +289,7 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
             return this.rootVisualElement.Q<Toggle>(toggleName).value;
         }
 
-        private void AddInternalAccess(string nameField, string folder, params string[] ignore)
+        private void WriteAssemblyInfo(string nameField, string folder, bool disableAutoTypeRegistration, params string[] ignore)
         {
             var otherAssemblies =
                 this
@@ -333,6 +303,12 @@ namespace BovineLabs.Core.Editor.AssemblyBuilder
             var assemblyInfoPath = GetAssemblyInfoPath(folder);
 
             var internalAccessTemplate = GetAssemblyInfoHeader();
+
+            if (disableAutoTypeRegistration)
+            {
+                internalAccessTemplate += DisableTypeRegistration;
+            }
+
             foreach (var assembly in otherAssemblies.OrderBy(s => s))
             {
                 internalAccessTemplate += string.Format(InternalAccessTemplate, assembly);

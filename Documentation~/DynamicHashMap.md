@@ -1,82 +1,145 @@
-﻿# DynamicHashMap
-## Summary
-Adds HashMap support to entities by reinterpreting a DynamicBuffer. 
+# DynamicHashMap
 
-## Setup
+## Overview
 
-Use the following interfaces depending on the type of container you want:
+Provides HashMap and other container types for entities by reinterpreting DynamicBuffers as native containers. This enables efficient key-value storage directly on entities with full Burst compatibility.
 
-| Type           | Interface                            |
-|----------------|--------------------------------------|
-| HashMap        | IDynamicHashMap<TKey, TValue>        |
-| MultiHashMap   | IDynamicMultiHashMap<TKey, TValue>   |
-| HashSet        | IDynamicHashSet<TKey, TValue>        |
-| PerfectHashMap | IDynamicPerfectHashMap<TKey, TValue> | 
+## Container Types
 
-The following examples use IDynamicHashMap, but IDynamicMultiHashMap and IDynamicHashSet work in the same way.
+| Interface                                  | Purpose                       |
+|--------------------------------------------|-------------------------------|
+| `IDynamicHashMap<TKey, TValue>`            | Standard key-value dictionary |
+| `IDynamicMultiHashMap<TKey, TValue>`       | Multiple values per key       |
+| `IDynamicHashSet<TKey>`                    | Unique value set              |
+| `IDynamicUntypedHashMap<TKey>`             | Variable value types          |
+| `IDynamicPerfectHashMap<TKey, TValue>`     | Read-only optimized map       |
+| `IDynamicVariableMap<TKey, TValue, T, TC>` | HashMap with extra column/s   |
 
-For example:
+## Basic Setup
+
+Define your container component:
 
 ```csharp
 [InternalBufferCapacity(0)]
-public struct MyHashMap : IDynamicHashMap<byte, int>
+public struct PlayerInventory : IDynamicHashMap<int, ItemData>
 {
-     byte IDynamicHashMap<byte, int>.Value { get; }
+    byte IDynamicHashMap<int, ItemData>.Value { get; }
 }
 ```
 
-Note that the value field ensures the buffer is the right size; however, it is not directly used.
+Initialize in your baker:
 
-## Initialization
-HashMaps must be initialized before use; this is usually done in your baker.
-```cs
-baker.AddBuffer<MyHashMap>().InitializeHashMap<MyHashMap, byte, int>();
+```csharp
+var buffer = baker.AddBuffer<PlayerInventory>();
+buffer.Initialize();
 ```
 
-## Using
-To use the HashMap, query the underlying DynamicBuffer and reinterpret it to the hashmap.
+## Usage
 
-```cs
+Access the container in systems:
+
+```csharp
 [BurstCompile]
-public partial struct MyJob : IJobEntity
+public partial struct InventorySystem : IJobEntity
 {
-    public void Execute(DynamicBuffer<MyHashMap> buffer)
+    public void Execute(DynamicBuffer<PlayerInventory> buffer)
     {
-        var hashMap = buffer.AsHashMap<MyHashMap, byte, int>();       
+        var inventory = buffer.AsMap();
+        
+        // Basic operations
+        inventory.Add(itemId, itemData);
+        if (inventory.TryGetValue(itemId, out var item))
+        {
+            // Process item
+        }
+        inventory.Remove(itemId);
+        
+        // Batch operations for performance
+        inventory.AddBatchUnsafe(itemIds, itemDataArray);
+        
+        // Enumeration
+        foreach (var kvp in inventory)
+        {
+            // Process each item
+        }
     }
 }
 ```
 
-From here, you can use it as a normal hashmap.
+## Extension Methods
 
-## Tips
-Having to remember to do the full generic invoke, `AsHashMap<MyHashMap, byte, int>()`, can get a bit tedious.
-I recommend writing a small extension to simplify this.
+**Auto-generation**: AsMap and Initialize extensions are automatically generated for `HashMap`, `MultiHashMap`, `HashSet`, `UntypedHashMap`, `VariableMap`, and `PerfectHashMap` variants. For `PerfectHashMap`, only `AsMap()` is generated - `Initialize()` methods require manual implementation due to special parameters.
 
-```cs
-public static class MyHashMapExtensions
+## Container-Specific Usage
+
+### UntypedHashMap
+```csharp
+public struct ConfigMap : IDynamicUntypedHashMap<FixedString64Bytes>
 {
-    public static DynamicBuffer<MyHashMap> Initialize(this DynamicBuffer<MyHashMap> buffer)
-    {
-        return buffer.InitializeHashMap<MyHashMap, byte, int>();
-    }
+    byte IDynamicUntypedHashMap<FixedString64Bytes>.Value { get; }
+}
 
-    public static DynamicHashMap<byte, int> AsMap(this DynamicBuffer<MyHashMap> buffer)
-    {
-        return buffer.AsHashMap<MyHashMap, byte, int>();
-    }
+// Runtime type flexibility
+config.Add<float>("speed", 5.0f);
+config.Add<int>("lives", 3);
+```
+
+### VariableMap
+```csharp
+using BovineLabs.Core.Iterators.Columns;
+
+// Single column example
+public struct InventoryMap : IDynamicVariableMap<int, ItemData, float, OrderedListColumn<float>>
+{
+    byte IDynamicVariableMap<int, ItemData, float, OrderedListColumn<float>>.Value { get; }
+}
+
+// Two column example  
+public struct EntityRelations : IDynamicVariableMap<Entity, RelationData, int, OrderedListColumn<int>, float, OrderedListColumn<float>>
+{
+    byte IDynamicVariableMap<Entity, RelationData, int, OrderedListColumn<int>, float, OrderedListColumn<float>>.Value { get; }
+}
+
+// Usage with auto-generated extensions
+var buffer = baker.AddBuffer<InventoryMap>();
+buffer.Initialize(capacity: 64);
+var map = buffer.AsMap();
+
+// Operations include column data
+map.Add(itemId, itemData, weight);
+if (map.TryGetValue(itemId, out var item, out var itemWeight))
+{
+    // Process item with its weight
+}
+
+// Iterate with column access
+foreach (var kvc in map)
+{
+    ProcessItem(kvc.Key, kvc.Value, kvc.Column);
 }
 ```
 
-Therefore, you can replace your usage with:
-
-```cs
-[BurstCompile]
-public partial struct MyJob : IJobEntity
+### PerfectHashMap
+```csharp
+public struct OptimizedLookup : IDynamicPerfectHashMap<int, float>
 {
-    public void Execute(DynamicBuffer<MyHashMap> buffer)
-    {
-        var hashMap = buffer.AsMap();       
-    }
+    byte IDynamicPerfectHashMap<int, float>.Value { get; }
 }
+
+// Manual initialization required with data source
+var sourceMap = new NativeHashMap<int, float>(10, Allocator.Temp);
+sourceMap.Add(1, 1.5f);
+sourceMap.Add(5, 2.5f);
+
+var buffer = baker.AddBuffer<OptimizedLookup>();
+buffer.InitializePerfectHashMap<OptimizedLookup, int, float>(sourceMap, 0f);
+
+// Auto-generated AsMap method available
+var lookup = buffer.AsMap();
+float value = lookup[1]; // Fast O(1) access
 ```
+
+## Performance Tips
+
+- **Pre-size containers**: Set appropriate initial capacity to avoid resizes
+- **Single-threaded only**: Not write thread-safe, use proper job scheduling

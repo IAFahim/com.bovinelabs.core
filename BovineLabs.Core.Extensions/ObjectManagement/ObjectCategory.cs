@@ -8,7 +8,6 @@ namespace BovineLabs.Core.ObjectManagement
     using System;
     using Unity.Entities;
 
-    // TODO is this needed?
     [Serializable]
     public struct ObjectCategory : IComponentData, IEquatable<ObjectCategory>, IComparable<ObjectCategory>
     {
@@ -39,6 +38,7 @@ namespace BovineLabs.Core.ObjectManagement
             return this.Value.GetHashCode();
         }
 
+        /// <inheritdoc/>
         public int CompareTo(ObjectCategory other)
         {
             return this.Value.CompareTo(other.Value);

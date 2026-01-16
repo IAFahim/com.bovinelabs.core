@@ -18,6 +18,7 @@ namespace BovineLabs.Core
 
     [Configurable]
     [WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.ThinClientSimulation | WorldSystemFilterFlags.Editor)]
+    [UpdateInGroup(typeof(InitializationSystemGroup), OrderFirst = true)]
     public partial class BLDebugSystem : InitSystemBase
     {
         private const int DefaultMinLength = 0;
@@ -25,22 +26,35 @@ namespace BovineLabs.Core
         [ConfigVar("debug.loglevel.min-world-length", DefaultMinLength, "The min length of the world name, useful for alignment.")]
         private static readonly SharedStatic<int> MinWorldLength = SharedStatic<int>.GetOrCreate<BLDebugSystem>();
 
-        /// <inheritdoc />
-        protected override void OnCreate()
+        internal static void Create(World world)
         {
-            var netDebugEntity = this.EntityManager.CreateSingleton<BLLogger>();
-            this.EntityManager.SetName(netDebugEntity, "DBDebug");
+            var netDebugEntity = world.EntityManager.CreateSingleton<BLLogger>();
+            world.EntityManager.SetName(netDebugEntity, "DBDebug");
 
-            var world = this.World.Name.TrimEnd("World").TrimEnd();
+            var worldName = world.Name.TrimEnd("World").TrimEnd();
 
             var maxLength = FixedString32Bytes.UTF8MaxLengthInBytes;
             var minLength = math.min(MinWorldLength.Data, maxLength);
 
             // Apply size limits
-            world = world.Length > maxLength ? world[..maxLength] : world;
-            world = world.PadRight(minLength);
+            worldName = worldName.Length > maxLength ? worldName[..maxLength] : worldName;
+            worldName = worldName.PadRight(minLength);
 
-            this.EntityManager.SetComponentData(netDebugEntity, new BLLogger { World = world });
+            world.EntityManager.SetComponentData(netDebugEntity, new BLLogger { World = worldName });
+        }
+
+        /// <inheritdoc />
+        protected override void OnCreate()
+        {
+            Create(this.World);
+        }
+
+        /// <inheritdoc/>
+        protected override void OnUpdate()
+        {
+            var frameCount = UnityEngine.Time.frameCount;
+            this.World.EntityManager.GetSingletonRW<BLLogger>().ValueRW.Frame = frameCount;
+            BLGlobalLogger.Frame.Data = frameCount;
         }
     }
 }

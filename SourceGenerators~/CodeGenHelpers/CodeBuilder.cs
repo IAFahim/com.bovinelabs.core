@@ -1,3 +1,4 @@
+using CodeGenHelpers.Internals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,7 @@ the code is regenerated.";
 
         private CodeBuilder(string? clrNamespace = null, IndentStyle indentStyle = IndentStyle.Spaces)
         {
-            Namespace = clrNamespace;
+            Namespace = NamespaceHelpers.IsGlobalNamespace(clrNamespace) ? null : clrNamespace;
             IndentStyle = indentStyle;
         }
 
@@ -72,7 +73,8 @@ the code is regenerated.";
             var builder = Create(typeSymbol.ContainingNamespace, indentStyle);
             return builder.AddClass(typeSymbol.Name)
                 .WithAccessModifier(typeSymbol.DeclaredAccessibility)
-                .OfType(typeSymbol.TypeKind);
+                .OfType(typeSymbol.TypeKind)
+                .ReadOnly(typeSymbol.IsReadOnly);
         }
 
         public CodeBuilder AddNamespaceImport(string importedNamespace)
@@ -210,7 +212,14 @@ the code is regenerated.";
                 return writer;
             }
 
-            using (writer.Block($"namespace {Namespace}"))
+            if (Namespace is not null)
+            {
+                using (writer.Block($"namespace {Namespace}"))
+                {
+                    WriteBody(writer);
+                }
+            }
+            else
             {
                 WriteBody(writer);
             }

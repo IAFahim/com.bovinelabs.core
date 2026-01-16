@@ -2,7 +2,7 @@
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
-#if !BL_DISABLE_PHYSICS_STATES
+#if !BL_DISABLE_PHYSICS_STATES && UNITY_PHYSICS
 namespace BovineLabs.Core.PhysicsStates
 {
     using BovineLabs.Core.Extensions;
@@ -18,6 +18,7 @@ namespace BovineLabs.Core.PhysicsStates
     {
         public NativeHashSet<TC> CurrentEvents;
 
+        /// <inheritdoc/>
         public void Execute()
         {
             this.CurrentEvents.RecalculateBuckets();

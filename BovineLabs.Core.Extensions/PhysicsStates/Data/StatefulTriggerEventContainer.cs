@@ -2,7 +2,7 @@
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
-#if !BL_DISABLE_PHYSICS_STATES
+#if !BL_DISABLE_PHYSICS_STATES && UNITY_PHYSICS
 namespace BovineLabs.Core.PhysicsStates
 {
     using BovineLabs.Core.Assertions;
@@ -18,8 +18,10 @@ namespace BovineLabs.Core.PhysicsStates
             this.TriggerEvent = triggerEvent;
         }
 
+        /// <inheritdoc/>
         public Entity EntityA => this.TriggerEvent.EntityA;
 
+        /// <inheritdoc/>
         public Entity EntityB => this.TriggerEvent.EntityB;
 
         public StatefulTriggerEvent Create(Entity entity, StatefulEventState state)
@@ -50,6 +52,7 @@ namespace BovineLabs.Core.PhysicsStates
             };
         }
 
+        /// <inheritdoc/>
         public bool Equals(StatefulTriggerEventContainer other)
         {
             return this.TriggerEvent.EntityA.Equals(other.EntityA) &&
@@ -58,6 +61,7 @@ namespace BovineLabs.Core.PhysicsStates
                 this.TriggerEvent.ColliderKeyB.Equals(this.TriggerEvent.ColliderKeyB);
         }
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             unchecked

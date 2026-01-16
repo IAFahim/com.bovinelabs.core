@@ -4,6 +4,8 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Unity.Entities;
+using UnityEngine;
 
 [assembly: InternalsVisibleTo("BovineLabs.Core.Editor")]
 [assembly: InternalsVisibleTo("BovineLabs.Core.Extensions")]
@@ -11,6 +13,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("BovineLabs.Core.Extensions.Debug")]
 [assembly: InternalsVisibleTo("BovineLabs.Core.Extensions.Editor")]
 [assembly: InternalsVisibleTo("BovineLabs.Core.Tests")]
+[assembly: InternalsVisibleTo("BovineLabs.Testing")]
 
 [assembly:
     SuppressMessage("Code Quality", "CS8632: The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.",

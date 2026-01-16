@@ -2,7 +2,7 @@
 //     Copyright (c) BovineLabs. All rights reserved.
 // </copyright>
 
-#if !BL_DISABLE_PHYSICS_STATES
+#if !BL_DISABLE_PHYSICS_STATES && UNITY_PHYSICS
 namespace BovineLabs.Core.PhysicsStates
 {
     using BovineLabs.Core.Extensions;
@@ -24,6 +24,7 @@ namespace BovineLabs.Core.PhysicsStates
 
         public int EventsPerRead;
 
+        /// <inheritdoc/>
         public void Execute()
         {
             var capacity = this.Reader.Count() / this.EventsPerRead;

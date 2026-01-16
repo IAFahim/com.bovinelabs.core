@@ -16,10 +16,11 @@ namespace BovineLabs.Core.Editor.Settings
     [SettingsGroup("Core")]
     public class EditorSettings : ScriptableObject, ISettings
     {
-        public const string SettingsKey = "settings";
-        public const string SettingsResourceKey = "settings.resource";
+        public const string SettingsKey = "bl.settings";
         public const string DefaultSettingsDirectory = "Assets/Settings/Settings";
-        public const string DefaultSettingsResourceDirectory = "Assets/Settings/";
+
+        [SerializeField]
+        private List<string> scriptingDefineSymbols = new List<string>();
 
         [SerializeField]
         private KeyPath[] paths = Array.Empty<KeyPath>();
@@ -39,6 +40,8 @@ namespace BovineLabs.Core.Editor.Settings
 
         [SerializeField]
         private KeyAuthoring[] settingAuthoring = { new() { World = "service" } };
+
+        public IReadOnlyList<string> ScriptingDefineSymbols => this.scriptingDefineSymbols;
 
 #if BL_CORE_EXTENSIONS && !BL_DISABLE_SUBSCENE
         public IReadOnlyList<SceneAsset> PrebakeScenes => this.prebakeScenes;
@@ -80,6 +83,39 @@ namespace BovineLabs.Core.Editor.Settings
 
             authoring = this.settingAuthoring.FirstOrDefault(k => k.World.ToLower() == world)?.Authoring;
             return authoring;
+        }
+
+        public void EnsureDefines(IReadOnlyList<string> add, IReadOnlyList<string>? remove = null)
+        {
+            bool changes = false;
+
+            foreach (var d in add)
+            {
+                if (!this.scriptingDefineSymbols.Contains(d))
+                {
+                    this.scriptingDefineSymbols.Add(d);
+                    changes = true;
+                }
+            }
+
+            if (remove != null)
+            {
+                foreach (var d in remove)
+                {
+                    if (this.scriptingDefineSymbols.Contains(d))
+                    {
+                        this.scriptingDefineSymbols.Remove(d);
+                        changes = true;
+                    }
+                }
+            }
+
+            if (changes)
+            {
+                EditorUtility.SetDirty(this);
+            }
+
+            ScriptingDefineSymbolsEditor.ApplyDefinesToAll(add, remove ?? Array.Empty<string>());
         }
 
         [Serializable]

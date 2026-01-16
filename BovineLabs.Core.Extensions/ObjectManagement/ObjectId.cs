@@ -17,18 +17,28 @@ namespace BovineLabs.Core.ObjectManagement
     [Serializable]
     public readonly struct ObjectId : IComponentData, IEquatable<ObjectId>, IComparable<ObjectId>
     {
-        private const int ModShift = 24;
-        private const int IDMask = (1 << 24) - 1;
+        public static readonly ObjectId Null = default;
+
+        private const int ModBytes = 10;
+        private const int ModShift = 32 - ModBytes;
+        private const int IDMask = (1 << ModShift) - 1;
+
+        public const int MaxModsIds = 1 << ModBytes;
 
         [CreateProperty(ReadOnly = true)]
         private readonly int rawValue;
 
-        public ObjectId(int id, byte mod = 0)
+        public ObjectId(int id, ushort mod = 0)
         {
 #if UNITY_EDITOR
             if (id > IDMask)
             {
                 throw new ArgumentOutOfRangeException(nameof(id), "Id too large");
+            }
+
+            if (mod >= MaxModsIds)
+            {
+                throw new ArgumentOutOfRangeException(nameof(mod), "Mod id too large");
             }
 #endif
 
@@ -36,7 +46,7 @@ namespace BovineLabs.Core.ObjectManagement
         }
 
         [CreateProperty]
-        public byte Mod => (byte)(this.rawValue >> ModShift);
+        public ushort Mod => (ushort)(this.rawValue >> ModShift);
 
         [CreateProperty]
         public int ID => this.rawValue & IDMask;
@@ -51,11 +61,13 @@ namespace BovineLabs.Core.ObjectManagement
             return left.ID != right.ID;
         }
 
+        /// <inheritdoc/>
         public int CompareTo(ObjectId other)
         {
             return this.rawValue.CompareTo(other.rawValue);
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"ID:{this.ID}";
@@ -69,7 +81,7 @@ namespace BovineLabs.Core.ObjectManagement
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            throw new SystemException("Not supported");
+            return obj is ObjectId other && this.Equals(other);
         }
 
         /// <inheritdoc />

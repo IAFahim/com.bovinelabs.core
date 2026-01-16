@@ -29,8 +29,9 @@ namespace BovineLabs.Core
         private static readonly SharedStatic<int> FixedUpdate = SharedStatic<int>.GetOrCreate<FixedUpdateKey>();
 
         private World serviceWorld;
+        private World menuWorld;
 
-#if !UNITY_SERVER
+#if !UNITY_NETCODE && !UNITY_SERVER
         private World gameWorld;
 #endif
 
@@ -40,7 +41,7 @@ namespace BovineLabs.Core
         /// <summary> Gets the service world if it exists. </summary>
         public static World ServiceWorld => Instance.serviceWorld;
 
-#if !UNITY_SERVER
+#if !UNITY_NETCODE
         /// <summary> Gets the single player world if it exists. </summary>
         public static World GameWorld => Instance.gameWorld;
 #endif
@@ -58,16 +59,18 @@ namespace BovineLabs.Core
         {
             Instance = this;
 
-            WorldAllocator.Initialize();
-
             this.Initialize();
             return true;
         }
 
         /// <summary> Creates a local game world as long as we aren't a dedicated server. </summary>
-        /// <exception cref="InvalidOperationException"> If there is already a local gmae world. </exception>
+        /// <exception cref="InvalidOperationException"> If there is already a local game world. </exception>
         public void CreateGameWorld()
         {
+#if UNITY_NETCODE
+            this.CreateClientServerWorlds(true);
+#else
+
 #if !UNITY_SERVER
             if (this.gameWorld != null)
             {
@@ -75,7 +78,6 @@ namespace BovineLabs.Core
             }
 
             this.gameWorld = new World("GameWorld", WorldFlags.Game);
-            WorldAllocator.CreateAllocator(this.gameWorld.Unmanaged.SequenceNumber);
 
             World.DefaultGameObjectInjectionWorld = this.gameWorld; // replace default injection world
 
@@ -85,11 +87,15 @@ namespace BovineLabs.Core
 
             InitializeWorld(this.gameWorld);
 #endif
+#endif
         }
 
         /// <summary> Destroys the game world. </summary>
         public void DestroyGameWorld()
         {
+#if UNITY_NETCODE
+            this.DestroyClientServerWorlds();
+#else
 #if !UNITY_SERVER
             if (this.gameWorld is not { IsCreated: true })
             {
@@ -98,8 +104,74 @@ namespace BovineLabs.Core
 
             World.DefaultGameObjectInjectionWorld = ServiceWorld;
 
-            DisposeWorld(this.gameWorld);
+            this.gameWorld.Dispose();
             this.gameWorld = null;
+#endif
+#endif
+        }
+
+        /// <summary> Creates a simple menu world as long as we aren't a dedicated server. </summary>
+        /// <exception cref="InvalidOperationException"> If there is already a menu world. </exception>
+        public void CreateMenuWorld()
+        {
+#if !UNITY_SERVER
+            if (this.menuWorld != null)
+            {
+                throw new InvalidOperationException("MenuWorld has not been correctly cleaned up");
+            }
+
+            this.menuWorld = new World("MenuWorld", Worlds.MenuWorld);
+
+            World.DefaultGameObjectInjectionWorld = this.menuWorld;
+
+            var systems = DefaultWorldInitialization.GetAllSystemTypeIndices(Worlds.Menu);
+            systems.Add(TypeManager.GetSystemTypeIndex<BLDebugSystem>());
+
+            // Add all unity systems
+            var allSystems = DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.Default);
+            foreach (var system in allSystems)
+            {
+                if (system.Namespace == null)
+                {
+                    continue;
+                }
+
+                if (!system.Namespace.StartsWith("Unity."))
+                {
+                    continue;
+                }
+
+#if UNITY_NETCODE
+                // But exclude netcode as that's not required in menu
+                if (system.Namespace.StartsWith("Unity.NetCode"))
+                {
+                    continue;
+                }
+#endif
+
+                systems.Add(TypeManager.GetSystemTypeIndex(system));
+            }
+
+            DefaultWorldInitialization.AddSystemsToRootLevelSystemGroups(this.menuWorld, systems);
+            ScriptBehaviourUpdateOrder.AppendWorldToCurrentPlayerLoop(this.menuWorld);
+
+            InitializeWorld(this.menuWorld);
+#endif
+        }
+
+        /// <summary> Destroys the game world. </summary>
+        public void DestroyMenuWorld()
+        {
+#if !UNITY_SERVER
+            if (this.menuWorld is not { IsCreated: true })
+            {
+                return;
+            }
+
+            World.DefaultGameObjectInjectionWorld = ServiceWorld;
+
+            this.menuWorld.Dispose();
+            this.menuWorld = null;
 #endif
         }
 
@@ -198,23 +270,16 @@ namespace BovineLabs.Core
                 return false;
             }
 
-            return t != typeof(FixedStepSimulationSystemGroup) && t != typeof(BeginFixedStepSimulationEntityCommandBufferSystem) &&
-                t != typeof(EndFixedStepSimulationEntityCommandBufferSystem) && t != typeof(VariableRateSimulationSystemGroup) &&
-                t != typeof(BeginVariableRateSimulationEntityCommandBufferSystem) && t != typeof(EndVariableRateSimulationEntityCommandBufferSystem) &&
-                t != typeof(CompanionGameObjectUpdateTransformSystem) &&
+            return
+#if !UNITY_DISABLE_MANAGED_COMPONENTS
+                t != typeof(CompanionGameObjectUpdateTransformSystem) && t != EntityInternals.CompanionGameObjectUpdateSystemType &&
+#endif
 #if !BL_DISABLE_TIME
                 t != typeof(UpdateWorldTimeSystem) &&
 #endif
-                t != EntityInternals.CompanionGameObjectUpdateSystemType;
-
-            // TODO do we need transform, companion, fixed/variable update etc
-        }
-
-        private static void DisposeWorld(World world)
-        {
-            var sn = world.SequenceNumber;
-            world.Dispose();
-            WorldAllocator.DisposeAllocator(sn);
+                t != typeof(FixedStepSimulationSystemGroup) && t != typeof(BeginFixedStepSimulationEntityCommandBufferSystem) &&
+                t != typeof(EndFixedStepSimulationEntityCommandBufferSystem) && t != typeof(VariableRateSimulationSystemGroup) &&
+                t != typeof(BeginVariableRateSimulationEntityCommandBufferSystem) && t != typeof(EndVariableRateSimulationEntityCommandBufferSystem);
         }
 
         private struct FrameRateKey

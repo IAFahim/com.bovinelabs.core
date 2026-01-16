@@ -34,10 +34,28 @@ namespace BovineLabs.Core.Collections
             return (T*)bb.Allocate(ref ptr, size);
         }
 
-        internal static void AllocateBlobAssetReference(this ref BlobBuilder blobBuilder, ref BlobPtr<BlobAssetHeader> header, BlobBuilder target)
+        /// <summary>
+        /// Allocates a <see cref="BlobArray{T}"/> inside <paramref name="builder"/> and copies the full contents of <paramref name="src"/> into it.
+        /// </summary>
+        public static void Construct<T>(this ref BlobBuilder builder, ref BlobArray<T> dest, in NativeArray<T> src) where T : unmanaged
         {
-            ref var bt = ref UnsafeUtility.As<BlobBuilder, BlobBuilderInternal>(ref target);
-            bt.AllocateBlobAssetReference(ref blobBuilder, ref header);
+            var blobArr = builder.Allocate(ref dest, src.Length);
+
+            // bulk-copy
+            var dst = UnsafeUtility.AddressOf(ref blobArr[0]);
+            var srcPtr = src.GetUnsafeReadOnlyPtr();
+            var  bytes  = (long)src.Length * UnsafeUtility.SizeOf<T>();
+
+            UnsafeUtility.MemCpy(dst, srcPtr, bytes);
+        }
+
+        /// <summary>
+        /// Allocates a <see cref="BlobArray{T}"/> inside <paramref name="builder"/> and copies the full contents of <paramref name="src"/> into it.
+        /// </summary>
+        public static void Construct<T>(this ref BlobBuilder builder, ref BlobArray<T> dest, in NativeList<T> src) where T : unmanaged
+        {
+            var list = src;
+            builder.Construct(ref dest, list.AsArray());
         }
 
         /// <summary> Allocates a BlobHashMap and copies all key value pairs from the source NativeHashMap. </summary>

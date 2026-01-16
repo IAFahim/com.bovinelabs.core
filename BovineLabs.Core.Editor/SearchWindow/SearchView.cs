@@ -48,7 +48,7 @@ namespace BovineLabs.Core.Editor.SearchWindow
                 searchItem.Item = this.currentNode[index];
             };
 
-            this.list.selectionChanged += this.OnListSelectionChange;
+            this.list.selectionChanged += this.OnItemsChosen;
             this.list.itemsChosen += this.OnItemsChosen;
 
             this.Title = "Root";
@@ -76,12 +76,6 @@ namespace BovineLabs.Core.Editor.SearchWindow
                 this.title = value;
                 this.RefreshTitle();
             }
-        }
-
-        public SelectionType SelectionType
-        {
-            get => this.list.selectionType;
-            set => this.list.selectionType = value;
         }
 
         public void Reset()
@@ -154,17 +148,16 @@ namespace BovineLabs.Core.Editor.SearchWindow
             this.SetCurrentSelectionNode(this.searchNode);
         }
 
-        private void OnListSelectionChange(IEnumerable<object> selection)
-        {
-            if (this.SelectionType == SelectionType.Single)
-            {
-                this.OnItemsChosen(selection);
-            }
-        }
-
         private void OnItemsChosen(IEnumerable<object> selection)
         {
-            var node = (TreeNode<Item>)selection.First();
+            var node = (TreeNode<Item>)selection.FirstOrDefault();
+
+            if (node == null)
+            {
+                // this.SetCurrentSelectionNode(this.currentNode.Parent);
+                return;
+            }
+
             if (node.ChildCount == 0)
             {
                 this.OnSelection?.Invoke(node.Value);
@@ -213,6 +206,8 @@ namespace BovineLabs.Core.Editor.SearchWindow
                 this.returnButton.SetEnabled(true);
                 this.returnIcon.style.visibility = Visibility.Visible;
             }
+
+            this.list.SetSelectionWithoutNotify(new[] { -1 });
         }
 
         private void OnNavigationReturn()
@@ -279,16 +274,19 @@ namespace BovineLabs.Core.Editor.SearchWindow
                 }
             }
 
+            /// <inheritdoc/>
             public bool Equals(Item other)
             {
                 return this.Path == other.Path && Equals(this.Icon, other.Icon) && Equals(this.Data, other.Data);
             }
 
+            /// <inheritdoc/>
             public override bool Equals(object obj)
             {
                 return obj is Item other && this.Equals(other);
             }
 
+            /// <inheritdoc/>
             public override int GetHashCode()
             {
                 unchecked

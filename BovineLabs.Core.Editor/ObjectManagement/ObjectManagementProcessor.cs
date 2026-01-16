@@ -20,8 +20,8 @@ namespace BovineLabs.Core.Editor.ObjectManagement
     public class ObjectManagementProcessor : AssetPostprocessor
     {
         private static readonly HashSet<string> AlreadyProcessedAssets = new();
-        private static readonly HashSet<Type> AlreadyProcessedAutoRef = new();
 
+        private static readonly HashSet<Type> AlreadyProcessedAutoRef = new();
         private static readonly Dictionary<Type, Processor> Processors = new();
         private static readonly Dictionary<Type, AutoRefAttribute> AutoRefMap = new();
         private static readonly GlobalProcessor Global = new();
@@ -79,6 +79,7 @@ namespace BovineLabs.Core.Editor.ObjectManagement
                 }
 
                 AutoRefMap.Clear();
+                AlreadyProcessedAutoRef.Clear();
 
                 foreach (var assetPath in Delayed)
                 {
@@ -226,7 +227,7 @@ namespace BovineLabs.Core.Editor.ObjectManagement
 
         private static int GetFirstFreeID(IReadOnlyDictionary<int, int> map)
         {
-            for (var i = 0; i < int.MaxValue; i++)
+            for (var i = 1; i < int.MaxValue; i++)
             {
                 if (!map.ContainsKey(i))
                 {
@@ -269,7 +270,7 @@ namespace BovineLabs.Core.Editor.ObjectManagement
 
                 this.map.TryGetValue(asset.ID, out var count);
 
-                if (count > 1)
+                if (asset.ID == 0 || count > 1)
                 {
                     var newId = GetFirstFreeID(this.map);
                     this.map[asset.ID] = count - 1; // update the old ID
@@ -338,7 +339,7 @@ namespace BovineLabs.Core.Editor.ObjectManagement
 
                 this.map.TryGetValue(asset.ID, out var count);
 
-                if (count > 1)
+                if (asset.ID == 0 || count > 1)
                 {
                     var newId = GetFirstFreeID(this.map);
                     this.map[asset.ID] = count - 1; // update the old ID

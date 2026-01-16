@@ -9,16 +9,16 @@ namespace BovineLabs.Core.Internal
 
     public static class UnityObjectRefExtensions
     {
-        public static int GetInstanceId<T>(this UnityObjectRef<T> unityObjectRef)
+        public static EntityId GetInstanceId<T>(this UnityObjectRef<T> unityObjectRef)
             where T : Object
         {
-            return unityObjectRef.Id.instanceId;
+            return unityObjectRef.Id.entityId;
         }
 
-        public static void SetInstanceId<T>(this ref UnityObjectRef<T> unityObjectRef, int instanceId)
+        public static void SetInstanceId<T>(this ref UnityObjectRef<T> unityObjectRef, EntityId entityId)
             where T : Object
         {
-            unityObjectRef.Id.instanceId = instanceId;
+            unityObjectRef.Id.entityId = entityId;
         }
     }
 }

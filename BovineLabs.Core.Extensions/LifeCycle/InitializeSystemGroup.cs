@@ -6,16 +6,34 @@
 namespace BovineLabs.Core.LifeCycle
 {
     using BovineLabs.Core.Groups;
-    using BovineLabs.Core.Pause;
     using BovineLabs.Core.Utility;
     using Unity.Entities;
+#if !BL_DISABLE_PAUSE
+    using BovineLabs.Core.Pause;
+#endif
 
-    [UpdateInGroup(typeof(BeginSimulationSystemGroup), OrderFirst = true)]
-    public partial class InitializeSystemGroup : ComponentSystemGroup, IUpdateWhilePaused
+    /// <summary>
+    /// Handles initialization of entities. Updates before DestroySystemGroup to allow access to data from destroyed entities.
+    /// </summary>
+    [WorldSystemFilter(Worlds.SimulationEditor | Worlds.Menu, Worlds.Simulation)]
+    [UpdateAfter(typeof(InstantiateCommandBufferSystem))]
+    [UpdateBefore(typeof(DestroySystemGroup))]
+    [UpdateInGroup(typeof(BeforeSceneSystemGroup))]
+    public partial class InitializeSystemGroup : ComponentSystemGroup
     {
         /// <inheritdoc />
         protected override void OnUpdate()
         {
+#if !BL_DISABLE_PAUSE
+            foreach (var p in SystemAPI.Query<RefRO<PauseGame>>().WithOptions(EntityQueryOptions.IncludeSystems))
+            {
+                if (p.ValueRO.PauseAll)
+                {
+                    return;
+                }
+            }
+#endif
+
             var query = SystemAPI.QueryBuilder().WithAny<InitializeEntity, InitializeSubSceneEntity>().Build();
             if (BurstUtil.IsEmpty(ref query))
             {

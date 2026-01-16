@@ -5,27 +5,27 @@
 namespace BovineLabs.Core.Editor.Utility
 {
     using System.Threading.Tasks;
+    using Unity.Collections;
     using Unity.Entities;
     using Unity.Entities.Editor;
     using Unity.Scenes;
     using UnityEditor;
     using UnityEngine;
 
-    [InitializeOnLoad]
     public static class LoadPrefabsAsEntities
     {
         private static World? selectedWorld;
         private static bool loading;
 
-        static LoadPrefabsAsEntities()
-        {
-            Editor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
-        }
-
         public static bool Enabled
         {
             get => EditorPrefs.GetBool("bl.debug.prefab-loading", false);
             set => EditorPrefs.SetBool("bl.debug.prefab-loading", value);
+        }
+
+        internal static void Initialize()
+        {
+            Editor.finishedDefaultHeaderGUI += OnPostHeaderGUI;
         }
 
         private static void OnPostHeaderGUI(Editor editor)
@@ -71,7 +71,7 @@ namespace BovineLabs.Core.Editor.Utility
                 {
                     var prefabGuid = new GUID(guid);
                     var entity = SceneSystem.LoadSceneAsync(selectedWorld!.Unmanaged, prefabGuid, new SceneSystem.LoadParameters { AutoLoad = true });
-                    LoadRemovePrefab(selectedWorld, entity);
+                    _ = LoadRemovePrefab(selectedWorld, entity);
                 }
 
                 GUI.enabled = true;
@@ -103,7 +103,7 @@ namespace BovineLabs.Core.Editor.Utility
             }
         }
 
-        private static async void LoadRemovePrefab(World world, Entity entity)
+        private static async Task LoadRemovePrefab(World world, Entity entity)
         {
             loading = true;
             try
@@ -125,9 +125,22 @@ namespace BovineLabs.Core.Editor.Utility
 
                 var prefab = world.EntityManager.GetComponentData<PrefabRoot>(entity).Root;
 
-                if (world.EntityManager.HasComponent<Prefab>(prefab))
+                if (world.EntityManager.HasBuffer<LinkedEntityGroup>(prefab))
                 {
-                    world.EntityManager.RemoveComponent<Prefab>(prefab);
+                    foreach (var leg in world.EntityManager.GetBuffer<LinkedEntityGroup>(prefab).ToNativeArray(Allocator.Temp))
+                    {
+                        if (world.EntityManager.HasComponent<Prefab>(leg.Value))
+                        {
+                            world.EntityManager.RemoveComponent<Prefab>(leg.Value);
+                        }
+                    }
+                }
+                else
+                {
+                    if (world.EntityManager.HasComponent<Prefab>(prefab))
+                    {
+                        world.EntityManager.RemoveComponent<Prefab>(prefab);
+                    }
                 }
 
                 EntitySelectionProxy.SelectEntity(world, prefab);

@@ -11,12 +11,11 @@ namespace BovineLabs.Core.Editor.SubScenes
     using UnityEngine.SceneManagement;
     using EditorSettings = BovineLabs.Core.Editor.Settings.EditorSettings;
 
-    [InitializeOnLoad]
     public static class StartupSceneSwap
     {
         private static string sceneAssetPath = string.Empty;
 
-        static StartupSceneSwap()
+        internal static void Initialize()
         {
             EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
         }
@@ -30,22 +29,12 @@ namespace BovineLabs.Core.Editor.SubScenes
                     var scene = EditorSettingsUtility.GetSettings<EditorSettings>().StartupScene;
                     if (scene == null)
                     {
+                        sceneAssetPath = string.Empty;
                         return;
                     }
 
                     sceneAssetPath = AssetDatabase.GetAssetPath(scene);
-                    var activeScene = SceneManager.GetActiveScene();
-
-                    // If already active, don't need to load
-                    if (sceneAssetPath == activeScene.path)
-                    {
-                        sceneAssetPath = string.Empty;
-                    }
-                    else
-                    {
-                        EditorSceneManager.SaveOpenScenes();
-                    }
-
+                    EditorSceneManager.SaveOpenScenes();
                     return;
                 }
 
@@ -53,15 +42,12 @@ namespace BovineLabs.Core.Editor.SubScenes
                 {
                     if (!string.IsNullOrWhiteSpace(sceneAssetPath))
                     {
-                        EditorSceneManager.LoadSceneAsyncInPlayMode(sceneAssetPath, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Single });
+                        if (SceneManager.GetActiveScene().path != sceneAssetPath)
+                        {
+                            EditorSceneManager.LoadSceneInPlayMode(sceneAssetPath, new LoadSceneParameters { loadSceneMode = LoadSceneMode.Single });
+                        }
                     }
 
-                    return;
-                }
-
-                default:
-                {
-                    sceneAssetPath = string.Empty;
                     return;
                 }
             }

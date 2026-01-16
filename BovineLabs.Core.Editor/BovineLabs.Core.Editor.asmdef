@@ -16,7 +16,9 @@
     "Unity.Mathematics",
     "Unity.Scenes",
     "Unity.Scenes.Editor",
+    "Unity.Splines",
     "Unity.Physics",
+    "Unity.Serialization.Editor",
     "Unity.Transforms",
     "Unity.VisualEffectGraph.Editor"
   ],
@@ -26,7 +28,12 @@
   "excludePlatforms": [],
   "allowUnsafeCode": true,
   "overrideReferences": false,
-  "precompiledReferences": [],
+  "precompiledReferences": [
+    "Unity.CompilationPipeline.Common.dll",
+    "Mono.Cecil.dll",
+    "Mono.Cecil.Rocks.dll",
+    "Mono.Cecil.Pdb.dll"
+  ],
   "autoReferenced": false,
   "defineConstraints": [],
   "versionDefines": [
@@ -59,6 +66,11 @@
       "name": "com.unity.visualeffectgraph",
       "expression": "",
       "define": "UNITY_VFX_GRAPH"
+    },
+    {
+      "name": "com.unity.splines",
+      "expression": "",
+      "define": "UNITY_SPLINES"
     }
   ],
   "noEngineReferences": false

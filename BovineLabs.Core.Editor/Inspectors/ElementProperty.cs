@@ -13,17 +13,17 @@ namespace BovineLabs.Core.Editor.Inspectors
     /// <summary> Provides an inspector ([CustomPropertyDrawer(typeof(T))]) with custom element but will fall back to PropertyField if not overriden. </summary>
     public abstract class ElementProperty : PropertyDrawer
     {
+        private SerializedObject? serializedObject;
+        private VisualElement? parent;
+
+        private static readonly Dictionary<SerializedProperty, object> Caches = new();
+
         protected enum ParentTypes : byte
         {
             Foldout,
             Label,
             None,
         }
-
-        private SerializedObject? serializedObject;
-        private VisualElement? parent;
-
-        private static readonly Dictionary<SerializedProperty, object> Caches = new();
 
         protected virtual ParentTypes ParentType { get; } = ParentTypes.Foldout;
 
@@ -33,6 +33,7 @@ namespace BovineLabs.Core.Editor.Inspectors
 
         protected SerializedProperty? RootProperty { get; private set; }
 
+        /// <inheritdoc/>
         public sealed override VisualElement CreatePropertyGUI(SerializedProperty rootProperty)
         {
             this.RootProperty = rootProperty;
@@ -67,6 +68,7 @@ namespace BovineLabs.Core.Editor.Inspectors
                     this.parent = new Foldout { text = this.GetDisplayName(rootProperty) };
                     this.parent.AddToClassList("unity-collection-view");
                     this.parent.AddToClassList("unity-list-view");
+                    this.parent.AddToClassList("unity-list-view__foldout-header");
                     break;
             }
 

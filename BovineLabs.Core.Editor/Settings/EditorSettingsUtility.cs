@@ -45,11 +45,47 @@ namespace BovineLabs.Core.Editor.Settings
             }
 
             var settings = GetOrCreateSettings(type);
-            CachedSettings[type] = settings;
-            return settings;
+            CachedSettings[type] = settings!;
+            return settings!;
         }
 
-        public static string GetAssetDirectory(string key, string defaultDirectory, string subDirectory = "")
+        /// <summary> Gets a settings file. Create if it doesn't exist and ensures it is setup properly. </summary>
+        /// <param name="settings"> The settings if found. </param>
+        /// <typeparam name="T"> The settings type. </typeparam>
+        /// <returns> True if settings is created. </returns>
+        /// <exception cref="Exception"> Thrown if more than 1 instance found in project. </exception>
+        public static bool TryGetSettings<T>(out T? settings)
+        {
+            var type = typeof(T);
+            var result = TryGetSettings(type, out var settingsUntyped);
+            settings = (T?)settingsUntyped;
+            return result;
+        }
+
+        /// <summary> Gets a settings file. Create if it doesn't exist and ensures it is setup properly. </summary>
+        /// <param name="type"> The type. </param>
+        /// <param name="settings"> The settings if found. </param>
+        /// <returns> True if settings is created. </returns>
+        /// <exception cref="Exception"> Thrown if more than 1 instance found in project. </exception>
+        public static bool TryGetSettings(Type type, out ISettings? settings)
+        {
+            if (CachedSettings.TryGetValue(type, out settings) && settings != null)
+            {
+                return true;
+            }
+
+            settings = GetOrCreateSettings(type, false);
+            if (settings == null)
+            {
+                return false;
+            }
+
+            CachedSettings[type] = settings;
+            return true;
+        }
+
+        // Can only be null if allowCreate is false
+        public static string? GetAssetDirectory(string key, string defaultDirectory, string subDirectory = "", bool allowCreate = true)
         {
             GetEditorSettings()?.GetOrAddPath(key, ref defaultDirectory);
 
@@ -58,7 +94,10 @@ namespace BovineLabs.Core.Editor.Settings
                 defaultDirectory = Path.Combine(defaultDirectory, subDirectory);
             }
 
-            AssetDatabaseHelper.CreateDirectories(ref defaultDirectory);
+            if (!AssetDatabaseHelper.CheckOrCreateDirectories(ref defaultDirectory, allowCreate))
+            {
+                return null;
+            }
 
             return defaultDirectory;
         }
@@ -164,13 +203,7 @@ namespace BovineLabs.Core.Editor.Settings
             }
         }
 
-        private static T GetOrCreateSettings<T>(Type type)
-            where T : ScriptableObject, ISettings
-        {
-            return (T)GetOrCreateSettings(type);
-        }
-
-        private static ISettings GetOrCreateSettings(Type type)
+        private static ISettings? GetOrCreateSettings(Type type, bool allowCreate = true)
         {
             if (!typeof(ISettings).IsAssignableFrom(type))
             {
@@ -186,21 +219,13 @@ namespace BovineLabs.Core.Editor.Settings
             {
                 case 0:
                 {
-                    string directory;
-                    var resourceAttribute = type.GetCustomAttribute<ResourceSettingsAttribute>();
-                    if (resourceAttribute != null)
-                    {
-                        var resources = "Resources";
-                        if (!string.IsNullOrWhiteSpace(resourceAttribute.Directory))
-                        {
-                            resources = Path.Combine(resources, resourceAttribute.Directory);
-                        }
+                    var subDirectoryAttribute = type.GetCustomAttribute<SettingSubDirectoryAttribute>();
+                    var subDirectory = subDirectoryAttribute != null ? subDirectoryAttribute.Directory : string.Empty;
+                    var directory = GetAssetDirectory(EditorSettings.SettingsKey, EditorSettings.DefaultSettingsDirectory, subDirectory, allowCreate: allowCreate);
 
-                        directory = GetAssetDirectory(EditorSettings.SettingsResourceKey, EditorSettings.DefaultSettingsResourceDirectory, resources);
-                    }
-                    else
+                    if (directory == null)
                     {
-                        directory = GetAssetDirectory(EditorSettings.SettingsKey, EditorSettings.DefaultSettingsDirectory);
+                        return null;
                     }
 
                     var path = Path.Combine(directory, $"{type.Name}.asset");
@@ -211,6 +236,11 @@ namespace BovineLabs.Core.Editor.Settings
 
                     if (!instance)
                     {
+                        if (!allowCreate)
+                        {
+                            return null;
+                        }
+
                         instance = ScriptableObject.CreateInstance(type);
                         AssetDatabase.CreateAsset(instance, path);
                         AssetDatabase.SaveAssets();

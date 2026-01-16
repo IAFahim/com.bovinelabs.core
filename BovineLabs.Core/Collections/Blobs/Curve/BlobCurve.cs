@@ -37,6 +37,8 @@ namespace BovineLabs.Core.Collections
 
         public float Duration => this.header.Duration;
 
+        public bool IsCreated => this.SegmentCount > 0;
+
         public static BlobAssetReference<BlobCurve> Create(AnimationCurve curve, Allocator allocator = Allocator.Persistent)
         {
             var builder = new BlobBuilder(Allocator.Temp);
@@ -62,6 +64,8 @@ namespace BovineLabs.Core.Collections
                 var timeBuilder = builder.Allocate(ref blobCurve.header.Times, 4);
                 timeBuilder[0] = timeBuilder[1] = timeBuilder[2] = timeBuilder[3] = key0.time;
                 builder.Allocate(ref blobCurve.segments, 1)[0] = new BlobCurveSegment(key0, key0);
+                blobCurve.header.StartTime = key0.time;
+                blobCurve.header.EndTime = key0.time;
             }
             else
             {
